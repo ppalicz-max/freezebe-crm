@@ -1,0 +1,1031 @@
+<title>Freezbee Sales CRM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<style>
+/* Layout: phone-width app column, black/pink Freezbee identity, commission "ticket" as the one bold element, fixed bottom nav + floating Log order. */
+:root{
+  --bg:#F7EDF2; --surface:#FFFFFF; --ink:#000000; --soft:#6E5C66; --line:#EBD9E2;
+  --pink:#E8AFCB; --accent:#A8336E;
+  --ticket-bg:#000000; --ticket-fg:#FFFFFF; --ticket-hi:#EDB0CD; --ticket-soft:#BCA6B2; --ticket-track:rgba(255,255,255,.16);
+  --good:#1E7A4B; --warn:#8F5B00; --bad:#C0352A;
+  --st-lead:#6E5C66; --st-contacted:#2D63A6; --st-tasting:#8F5B00; --st-negotiating:#7A3FA8; --st-customer:#1E7A4B; --st-lost:#8E8389;
+  --fab-bg:#000000; --fab-fg:#EDB0CD; --overlay:rgba(30,10,20,.5);
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D0A0C; --surface:#1B1519; --ink:#F8EAF1; --soft:#B7A0AC; --line:#30262C;
+  --pink:#EDB0CD; --accent:#F0B6D2;
+  --ticket-bg:#EDB0CD; --ticket-fg:#000000; --ticket-hi:#000000; --ticket-soft:#5E3B4C; --ticket-track:rgba(0,0,0,.16);
+  --good:#62C893; --warn:#E6B354; --bad:#FF7D70;
+  --st-lead:#B7A0AC; --st-contacted:#7FB0F0; --st-tasting:#E6B354; --st-negotiating:#C69AF0; --st-customer:#62C893; --st-lost:#8E8389;
+  --fab-bg:#EDB0CD; --fab-fg:#000000; --overlay:rgba(0,0,0,.6); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D0A0C; --surface:#1B1519; --ink:#F8EAF1; --soft:#B7A0AC; --line:#30262C;
+  --pink:#EDB0CD; --accent:#F0B6D2;
+  --ticket-bg:#EDB0CD; --ticket-fg:#000000; --ticket-hi:#000000; --ticket-soft:#5E3B4C; --ticket-track:rgba(0,0,0,.16);
+  --good:#62C893; --warn:#E6B354; --bad:#FF7D70;
+  --st-lead:#B7A0AC; --st-contacted:#7FB0F0; --st-tasting:#E6B354; --st-negotiating:#C69AF0; --st-customer:#62C893; --st-lost:#8E8389;
+  --fab-bg:#EDB0CD; --fab-fg:#000000; --overlay:rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tap{transition:opacity .12s}.tap:active{opacity:.6}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.num{font-variant-numeric:tabular-nums}
+.d{font-family:var(--f-display);font-stretch:72%;font-weight:800;line-height:.95;letter-spacing:-.005em;font-variant-numeric:tabular-nums}
+
+#main{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(170px + env(safe-area-inset-bottom,0px))}
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:22px 16px}
+.hdr-txt{min-width:0}
+.brand{font-family:var(--f-display);font-stretch:62%;font-weight:900;font-size:15px;letter-spacing:.06em;color:var(--accent)}
+.hdr h1{font-family:var(--f-display);font-stretch:68%;font-weight:900;font-size:46px;line-height:.92;text-transform:uppercase;margin:4px 0 0;text-wrap:balance}
+.sub{margin:6px 0 0;color:var(--soft);font-size:14px}
+.hdr-r{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-bottom:4px}
+.status{font-size:12px;color:var(--soft);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.status svg.i{width:14px;height:14px}
+.status.err{color:var(--bad);font-weight:600}
+
+.sec{margin-top:28px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.sec-h h2{font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:26px;margin:0;line-height:1}
+.sec-h .aside{font-size:13px;color:var(--soft)}
+.card{background:var(--surface);border-radius:18px;overflow:hidden}
+.empty{background:var(--surface);border-radius:18px;padding:18px;color:var(--soft);font-size:15px}
+.note{color:var(--soft);font-size:13px;margin:10px 4px 0}
+.banner{background:var(--surface);border-left:4px solid var(--bad);border-radius:12px;padding:14px 16px;margin-top:8px}
+.banner b{display:block;margin-bottom:4px}
+
+/* ticket */
+.ticket{background:var(--ticket-bg);color:var(--ticket-fg);border-radius:24px;position:relative;overflow:hidden}
+.t-top,.t-bot{padding:20px}
+.t-lbl{margin:0;font-size:14px;color:var(--ticket-soft)}
+.t-big{margin:10px 0 0;font-family:var(--f-display);font-stretch:66%;font-weight:900;font-size:66px;line-height:.9;color:var(--ticket-hi);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.bar{height:8px;border-radius:99px;background:var(--ticket-track);overflow:hidden;margin-top:18px}
+.bar>i{display:block;height:100%;background:var(--ticket-hi);border-radius:99px;transition:width .4s}
+.bar-txt{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--ticket-soft);margin-top:8px}
+.perf{position:relative;height:0;margin:0 20px;border-top:2px dashed var(--ticket-track)}
+.perf::before,.perf::after{content:"";position:absolute;width:26px;height:26px;border-radius:50%;background:var(--bg);top:-14px}
+.perf::before{left:-33px}.perf::after{right:-33px}
+.t-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.t-stat b{display:block;font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:24px;line-height:1;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.t-stat span{display:block;font-size:12px;color:var(--ticket-soft);margin-top:4px}
+.mix{display:flex;gap:2px;height:10px;border-radius:99px;overflow:hidden;background:var(--ticket-track);margin-top:20px}
+.mix>i{display:block;height:100%;background:var(--ticket-hi)}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;margin-top:12px;font-size:13px}
+.legend div{display:flex;align-items:center;gap:8px;min-width:0}
+.legend .dot{width:10px;height:10px;border-radius:50%;background:var(--ticket-hi);flex-shrink:0}
+.legend .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ticket-soft)}
+.legend b{font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+
+.start{background:var(--surface);border-radius:20px;padding:20px;margin-bottom:16px}
+.start h2{font-family:var(--f-display);font-stretch:70%;font-weight:900;font-size:30px;line-height:1;margin:0;text-transform:uppercase}
+.start p{color:var(--soft);margin:8px 0 16px}
+
+/* rows */
+.row{display:flex;align-items:center;gap:8px;padding-right:12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:12px 0 12px 14px;text-align:left}
+.avatar{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rt{min-width:0;flex:1}
+.rt b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt span{display:block;font-size:14px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt span.late{color:var(--bad)}.rt span.soon{color:var(--warn)}
+.callbtn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good);flex-shrink:0;text-decoration:none}
+.callbtn svg.i{width:18px;height:18px}
+.earn{font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:22px;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
+.badge{font-size:12px;font-weight:600;padding:4px 9px;border-radius:99px;white-space:nowrap;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.paid{font-size:12px;font-weight:600;padding:4px 9px;border-radius:99px;white-space:nowrap}
+.paid.yes{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+.paid.no{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.orow{display:flex;align-items:center;gap:12px;padding-right:14px;border-top:1px solid var(--line)}
+.orow:first-child{border-top:0}
+.orow-main{flex:1;min-width:0;text-align:left;padding:12px 0 12px 14px}
+.orow-main b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.orow-main span{display:block;font-size:14px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.orow-r{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+
+/* chips & buttons */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:calc(-1 * max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{padding:8px 15px;border-radius:99px;font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0;background:var(--surface);border:1px solid var(--line)}
+.chip[aria-pressed="true"]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:var(--bg)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:16px;font-weight:600;font-size:16px;text-decoration:none}
+.btn-ink{background:var(--ink);color:var(--bg)}
+.btn-pink{background:var(--pink);color:#000}
+.btn-plain{background:var(--surface);color:var(--ink)}
+.btn-line{border:1px solid var(--line);background:var(--surface)}
+.btn-danger{border:1px solid var(--bad);color:var(--bad)}
+.btn-danger.armed{background:var(--bad);color:var(--bg)}
+.btn:disabled{opacity:.4;cursor:default}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:99px;font-weight:600;background:var(--surface);text-decoration:none;font-size:15px}
+.pill svg.i{width:16px;height:16px}
+.pill-ink{background:var(--ink);color:var(--bg)}
+
+/* search */
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 12px;color:var(--soft)}
+.search input{flex:1;min-width:0;border:0;background:transparent;padding:12px 0;outline:none;color:var(--ink);font-size:16px}
+
+/* client detail */
+.back-row{display:flex;justify-content:space-between;align-items:center;padding-top:14px}
+.back{display:flex;align-items:center;gap:2px;color:var(--soft);font-weight:500;padding:8px 4px}
+.cd-meta{display:flex;align-items:center;gap:8px;color:var(--soft);font-size:14px;margin-top:10px}
+.cd-meta svg.i{width:16px;height:16px}
+.cd-name{font-family:var(--f-display);font-stretch:68%;font-weight:900;font-size:44px;line-height:.92;margin:8px 0 0;text-transform:uppercase;overflow-wrap:anywhere;text-wrap:balance}
+.cd-contact{margin-top:8px;color:var(--soft)}
+.contact-list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.cline{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:14px;padding:6px 6px 6px 14px}
+.cline .val{flex:1;min-width:0;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
+.cline .mini{padding:8px 12px;border-radius:10px;font-size:14px;font-weight:600;background:var(--bg);text-decoration:none;white-space:nowrap}
+.cline .mini.go{background:var(--good);color:var(--bg)}
+.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;background:var(--surface);border-radius:18px;padding:16px}
+.stats3 b{display:block;font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:24px;line-height:1;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.stats3 b.acc{color:var(--accent)}
+.stats3 span{display:block;font-size:12px;color:var(--soft);margin-top:4px}
+.fu{background:var(--surface);border-radius:18px;padding:16px}
+.fu-top{display:flex;align-items:center;gap:12px}
+.fu-top .rt span.late{color:var(--bad)}
+.input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px;outline:none;color:var(--ink);font-size:16px;min-height:48px}
+input[type=date].input{-webkit-appearance:none;appearance:none;display:block}
+textarea.input{resize:vertical;min-height:84px}
+.mini-btn{padding:8px 12px;border-radius:99px;font-size:14px;font-weight:600;background:var(--bg)}
+.act{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.act:first-child{border-top:0}
+.act .rt b{white-space:normal}
+.act .txt{font-size:14px;margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+.x{color:var(--soft);align-self:flex-start;padding:2px}
+.x svg.i{width:16px;height:16px}
+
+/* orders */
+.monthnav{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:16px;padding:4px}
+.monthnav button{padding:12px}
+.monthnav span{font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:24px;text-transform:capitalize}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.tile{background:var(--surface);border-radius:16px;padding:14px 16px;min-width:0}
+.tile b{display:block;font-family:var(--f-display);font-stretch:68%;font-weight:800;font-size:30px;line-height:1;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.tile b.acc{color:var(--accent)}.tile b.warn{color:var(--warn)}
+.tile span{display:block;font-size:13px;color:var(--soft);margin-top:4px}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pipe button{background:var(--surface);border-radius:14px;padding:12px;text-align:left;border-left:4px solid var(--c)}
+.pipe b{display:block;font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:28px;line-height:1}
+.pipe span{display:block;font-size:13px;color:var(--soft);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* team */
+.team-wrap{overflow-x:auto;background:var(--surface);border-radius:18px}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+th,td{padding:12px 14px;text-align:right;white-space:nowrap;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-weight:600;color:var(--soft);border-top:0;font-size:13px}
+th:first-child,td:first-child{text-align:left}
+td.acc{color:var(--accent);font-weight:700}
+tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.me{color:var(--soft);font-weight:400}
+
+/* settings */
+.prod{background:var(--surface);border-radius:18px;padding:16px}
+.prod+.prod{margin-top:10px}
+.prod.off{opacity:.55}
+.prod-name{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;padding:4px 0;outline:none;font-family:var(--f-display);font-stretch:72%;font-weight:800;font-size:24px;color:var(--ink)}
+.prod-ro{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.prod-ro:first-child{border-top:0}
+.prod-ro b{font-weight:600}
+.prod-ro span{color:var(--soft);font-size:14px;text-align:right}
+.lbl{display:block;font-size:13px;font-weight:600;color:var(--soft);margin:0 0 6px}
+.field{display:block;margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.prod-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--soft)}
+.panel{background:var(--surface);border-radius:18px;padding:16px}
+
+/* nav & fab */
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.nav-in{max-width:600px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+.nav-in button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 5px;color:var(--soft);font-size:12px;font-weight:500}
+.nav-in button[aria-current="page"]{color:var(--ink);font-weight:700}
+.nav-in button i{display:block;width:22px;height:3px;border-radius:2px;background:transparent}
+.nav-in button[aria-current="page"] i{background:var(--pink)}
+#fab{position:fixed;z-index:30;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));pointer-events:none;left:0;display:flex;justify-content:flex-end;max-width:calc(600px + (100vw - 600px)/2)}
+.fab{pointer-events:auto;display:flex;align-items:center;gap:8px;padding:14px 20px 14px 16px;border-radius:99px;background:var(--fab-bg);color:var(--fab-fg);font-weight:700;font-size:16px;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+.savebar{position:fixed;z-index:35;left:0;right:0;bottom:calc(72px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.savebar .btn{max-width:568px;margin:0 auto;box-shadow:0 10px 24px rgba(0,0,0,.2)}
+#toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:calc(100% - 32px);text-align:center}
+
+/* sheet */
+.overlay{position:fixed;inset:0;z-index:50;background:var(--overlay);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:600px;max-height:92vh;max-height:92dvh;background:var(--bg);border-radius:26px 26px 0 0;display:flex;flex-direction:column;animation:up .2s ease-out;outline:none}
+@keyframes up{from{transform:translateY(36px);opacity:0}to{transform:none;opacity:1}}
+.sh-h{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px}
+.sh-h h2{margin:0;font-family:var(--f-display);font-stretch:68%;font-weight:900;font-size:32px;line-height:1;text-transform:uppercase}
+.sh-x{width:40px;height:40px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center}
+.sh-b{overflow-y:auto;padding:0 20px 20px;flex:1;min-height:0}
+.sh-f{background:var(--surface);border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px))}
+.prow{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:16px;padding:10px 10px 10px 14px}
+.prow+.prow{margin-top:8px}
+.prow .rt span{font-size:12px}
+.step{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.step button{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.step input{width:56px;height:40px;border:0;border-radius:12px;text-align:center;font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:24px;background:var(--bg);color:var(--ink);outline:none}
+.step input.on{background:var(--ink);color:var(--bg)}
+.ofoot{display:flex;align-items:center;gap:12px}
+.ofoot .sum{flex:1;min-width:0}
+.ofoot .sum b{display:block;font-family:var(--f-display);font-stretch:68%;font-weight:900;font-size:32px;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.ofoot .sum span{display:block;font-size:13px;color:var(--soft);margin-top:4px;overflow-wrap:anywhere}
+.ofoot .btn{width:auto;padding:16px 22px;flex-shrink:0}
+.sel{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px;font-size:16px;color:var(--ink);min-height:48px}
+.gate{background:var(--surface);border-radius:20px;padding:22px;margin-top:8px}
+.gate h2{font-family:var(--f-display);font-stretch:70%;font-weight:900;font-size:30px;line-height:1;margin:0 0 8px;text-transform:uppercase}
+.gate p{color:var(--soft);margin:0}
+@media (prefers-reduced-motion: reduce){.sheet{animation:none}.tap,.bar>i{transition:none}}
+</style>
+
+<main id="main"></main>
+<div id="fab"></div>
+<div id="savebarSlot"></div>
+<nav id="nav" aria-label="Sections"></nav>
+<div id="sheet"></div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- strings ---------- */
+const T = {
+en:{
+ nav_home:'Today',nav_clients:'Clients',nav_orders:'Orders',nav_team:'Team',nav_settings:'Settings',
+ log_order:'Log order',saving:'Saving…',saved:'Saved',not_saved:'Not saved',loading:'Loading your clients…',
+ commission_in:'Your commission in {m}',goal_pct:'{p}% of {g} goal',goal_reached:'Goal reached',to_go:'{v} to go',
+ pizzas_sold:'Pieces sold',net_sales:'Net sales',not_paid:'Not paid out',
+ followups:'Follow-ups',followups_empty:'Nothing due this week. Set a follow-up date on a client and it shows up here.',
+ reorder_due:'Due for a reorder',last_order_ago:'Last order {n} days ago',best_clients:'Best clients this month',pipeline:'Pipeline',
+ start_title:'Start with your first client',start_body:'Add a hotel, bar or restaurant, then log each order. Your commission adds up automatically.',
+ add_client:'Add client',today:'Today',tomorrow:'Tomorrow',overdue1:'1 day overdue',overdueN:'{n} days overdue',inN:'In {n} days, {d}',
+ clients_sub:'{n} total, {b} buying',no_clients_yet:'No clients yet',search_ph:'Search name, city, contact',
+ all_types:'All types',all_stages:'All stages',clients_empty:'Add the hotels, bars and restaurants you sell to, or want to.',
+ clients_nomatch:'No clients match these filters.',followup_prefix:'Follow up: {r}',
+ back:'Back',edit:'Edit',call:'Call',copy:'Copy',copied:'Copied',email:'Email',directions:'Directions',
+ pieces_bought:'Pieces bought',your_commission:'Your commission',log_activity:'Log activity',stage:'Stage',
+ next_followup:'Next follow-up',not_set:'Not set',clear:'Clear',in3:'In 3 days',next_week:'Next week',in2w:'In 2 weeks',no_followup:'No follow-up',
+ pick_date:'Or pick a date',orders:'Orders',last_on:'Last on {d}',orders_empty_client:'No orders yet. Tap Log order when {n} buys.',
+ activity:'Activity',activity_empty:'Log calls, visits and tastings to keep a history with this client.',notes:'Notes',
+ delete_client:'Delete client',delete_client_confirm:'Tap again to delete client and their orders',
+ paid_out:'Paid out',unpaid:'Unpaid',pieces_n:'{n} pcs',pieces_net:'{n} pcs, {v} net',
+ orders_sub:'Every order and what it earns you',commission:'Commission',mark_all_paid:'Mark all {n} as paid out',all:'All',
+ orders_empty_month:'No orders in {m}. Tap Log order to add one.',orders_nomatch:'No orders match this filter.',
+ paid_hint:'Tap Unpaid once you have received the commission for an order.',
+ export_orders:'Export orders',export_clients:'Export clients',exported:'File saved',export_declined:'Export cancelled',export_failed:'Export isn’t available here',
+ settings_sub:'Products, goals and your data',language:'Language',goals:'Goals and reminders',
+ goal_label:'Monthly commission goal ({c})',reorder_label:'Remind me to call a customer after this many days without an order',
+ save_changes:'Save changes',changes_saved:'Changes saved',products:'Products',
+ products_hint_admin:'Net prices without VAT. New orders use these numbers; orders already logged keep theirs. Every rep sees this list.',
+ products_hint_rep:'Set by the CRM owner. Net prices without VAT.',
+ net_price:'Net price ({c})',commission_per:'Commission per piece ({c})',pct_of_price:'{p}% of the net price',
+ add_product:'Add product',hide_product:'Hide from orders',show_product:'Show in orders',hidden:'Hidden from new orders',vat_label:'VAT rate (%)',
+ your_data:'Your data',data_note:'Your clients and orders save automatically to your account. Other reps can’t see them; the CRM’s owner and editors can, in the Team view.',
+ team_sub:'Each rep’s results for the month',team_empty:'No reps yet. Share this CRM with your reps; they appear here once they open it.',
+ rep_someone:'Unnamed rep',you:'(you)',rep:'Rep',clients_lbl:'Clients',total:'Total',
+ new_client:'New client',edit_client:'Edit client',biz_name:'Business name',biz_ph:'e.g. Aranyhíd Hotel',type:'Type',
+ contact:'Contact person',contact_ph:'e.g. Kata, head chef',phone:'Phone',address:'Address',city:'City',
+ notes_ph:'Delivery days, freezer space, who decides',choose_client:'Choose a client',client:'Client',date:'Date',
+ note_opt:'Note (optional)',note_ph:'e.g. Deliver Thursday morning',save_order:'Save order',edit_order:'Edit order',
+ delete_order:'Delete order',delete_order_confirm:'Tap again to delete this order',
+ order_needs_client:'Every order belongs to a client. Add the hotel, bar or restaurant first.',
+ unit_line:'{p} net, you earn {c}',foot_line:'{n} pcs, {net} net, {gross} gross',what_happened:'What happened',
+ close:'Close',less:'One less {n}',more:'One more {n}',
+ signin_title:'Sign in to use the CRM',signin_body:'This CRM saves your clients and orders to your claude.ai account. Open it in Claude while signed in.',
+ readonly_title:'You can look around, but nothing is saved',readonly_body:'Ask the CRM’s owner for access that lets you edit (Contributor or Editor), then reload.',
+ save_failed:'Couldn’t save. Check your connection and try again.',quota:'The database is full. Delete old clients or orders to continue.',
+ product_name:'Product name',new_product:'New product',name_required:'Enter the business name',
+ type_Hotel:'Hotel',type_Bar:'Bar',type_Restaurant:'Restaurant',type_Sport:'Sport',type_Leisure:'Leisure',type_Children:'Children',type_Other:'Other',
+ members:'Team members',add_member:'Add team member',new_member:'New team member',edit_member:'Edit team member',
+ m_name:'Name',m_name_ph:'e.g. Kovács Anna',position:'Position',position_ph:'e.g. Sales rep',segment:'Segment',segment_ph:'e.g. Hotels, Budapest',
+ m_account:'CRM account',m_not_linked:'Not linked yet',m_account_hint:'Once you have shared the CRM with this person and they have opened it, pick their account here. Their results then show under this name.',
+ members_empty:'Add your reps with their contact details. Adding someone here doesn’t give them access: share the CRM with them from the Share menu too.',
+ members_note:'Only you and the CRM’s editors see this list.',save_member:'Save team member',delete_member:'Remove team member',delete_member_confirm:'Tap again to remove from the list',
+ m_name_required:'Enter a name',linked:'Uses the CRM',not_using:'Not using the CRM yet',account_n:'Account {n}',
+ st_lead:'Lead',st_contacted:'Contacted',st_tasting:'Tasting',st_negotiating:'Negotiating',st_customer:'Customer',st_lost:'Lost',
+ act_call:'Call',act_visit:'Visit',act_email:'Email',act_tasting:'Tasting',act_note:'Note',
+ csv_orders:'Date;Client;Type;City;Product;Qty;Net unit price;Net total;Commission per piece;Commission;Paid out;Note',
+ csv_clients:'Name;Type;Stage;Contact;Phone;Email;Address;City;Next follow-up;Orders;Pieces;Net sales;Commission;Notes',
+ yes:'Yes',no:'No'
+},
+hu:{
+ nav_home:'Ma',nav_clients:'Ügyfelek',nav_orders:'Rendelések',nav_team:'Csapat',nav_settings:'Beállítások',
+ log_order:'Új rendelés',saving:'Mentés…',saved:'Mentve',not_saved:'Nincs mentve',loading:'Ügyfelek betöltése…',
+ commission_in:'{m} havi jutalékod',goal_pct:'A {g} cél {p}%-a',goal_reached:'Cél teljesítve',to_go:'Még {v}',
+ pizzas_sold:'Eladott darab',net_sales:'Nettó forgalom',not_paid:'Kifizetetlen',
+ followups:'Teendők',followups_empty:'Erre a hétre nincs teendő. Adj meg követési dátumot egy ügyfélnél, és itt megjelenik.',
+ reorder_due:'Újrarendelés esedékes',last_order_ago:'Utolsó rendelés {n} napja',best_clients:'A hónap legjobb ügyfelei',pipeline:'Értékesítési tölcsér',
+ start_title:'Kezdd az első ügyféllel',start_body:'Vegyél fel egy szállodát, bárt vagy éttermet, majd rögzítsd a rendeléseit. A jutalékod automatikusan összeadódik.',
+ add_client:'Új ügyfél',today:'Ma',tomorrow:'Holnap',overdue1:'1 napja lejárt',overdueN:'{n} napja lejárt',inN:'{n} nap múlva, {d}',
+ clients_sub:'{n} ügyfél, {b} rendel',no_clients_yet:'Még nincs ügyfél',search_ph:'Keresés: név, város, kapcsolattartó',
+ all_types:'Minden típus',all_stages:'Minden szakasz',clients_empty:'Vedd fel a szállodákat, bárokat és éttermeket, akiknek eladsz vagy eladnál.',
+ clients_nomatch:'Nincs a szűrésnek megfelelő ügyfél.',followup_prefix:'Teendő: {r}',
+ back:'Vissza',edit:'Szerkesztés',call:'Hívás',copy:'Másolás',copied:'Másolva',email:'E-mail',directions:'Útvonal',
+ pieces_bought:'Vásárolt darab',your_commission:'Jutalékod',log_activity:'Esemény rögzítése',stage:'Szakasz',
+ next_followup:'Következő teendő',not_set:'Nincs megadva',clear:'Törlés',in3:'3 nap múlva',next_week:'Jövő héten',in2w:'2 hét múlva',no_followup:'Nincs',
+ pick_date:'Vagy válassz dátumot',orders:'Rendelések',last_on:'Utolsó: {d}',orders_empty_client:'Még nincs rendelés. Ha {n} rendel, koppints az Új rendelés gombra.',
+ activity:'Események',activity_empty:'Rögzítsd a hívásokat, látogatásokat és kóstoltatásokat, hogy meglegyen az ügyfél előzménye.',notes:'Jegyzetek',
+ delete_client:'Ügyfél törlése',delete_client_confirm:'Koppints újra: az ügyfél és a rendelései törlődnek',
+ paid_out:'Kifizetve',unpaid:'Kifizetetlen',pieces_n:'{n} db',pieces_net:'{n} db, nettó {v}',
+ orders_sub:'Minden rendelés és a jutalékod',commission:'Jutalék',mark_all_paid:'Mind a(z) {n} kifizetve',all:'Mind',
+ orders_empty_month:'{m}: nincs rendelés. Koppints az Új rendelés gombra.',orders_nomatch:'Nincs a szűrésnek megfelelő rendelés.',
+ paid_hint:'Ha megkaptad egy rendelés jutalékát, koppints a Kifizetetlen jelölésre.',
+ export_orders:'Rendelések exportálása',export_clients:'Ügyfelek exportálása',exported:'Fájl mentve',export_declined:'Exportálás megszakítva',export_failed:'Az exportálás itt nem érhető el',
+ settings_sub:'Termékek, célok és adataid',language:'Nyelv',goals:'Célok és emlékeztetők',
+ goal_label:'Havi jutalékcél ({c})',reorder_label:'Ennyi nap rendelés nélkül után emlékeztessen, hogy hívjam az ügyfelet',
+ save_changes:'Mentés',changes_saved:'Mentve',products:'Termékek',
+ products_hint_admin:'Nettó árak ÁFA nélkül. Az új rendelések ezeket használják, a korábbiak megtartják a sajátjukat. Minden értékesítő ezt a listát látja.',
+ products_hint_rep:'A CRM tulajdonosa állítja be. Nettó árak ÁFA nélkül.',
+ net_price:'Nettó ár ({c})',commission_per:'Jutalék darabonként ({c})',pct_of_price:'a nettó ár {p}%-a',
+ add_product:'Új termék',hide_product:'Elrejtés',show_product:'Megjelenítés',hidden:'Új rendelésben nem látszik',vat_label:'ÁFA (%)',
+ your_data:'Adataid',data_note:'Az ügyfeleid és rendeléseid automatikusan mentődnek a fiókodba. A többi értékesítő nem látja őket; a CRM tulajdonosa és szerkesztői a Csapat nézetben igen.',
+ team_sub:'Az értékesítők havi eredményei',team_empty:'Még nincs értékesítő. Oszd meg a CRM-et az értékesítőkkel; megnyitás után itt jelennek meg.',
+ rep_someone:'Névtelen értékesítő',you:'(te)',rep:'Értékesítő',clients_lbl:'Ügyfél',total:'Összesen',
+ new_client:'Új ügyfél',edit_client:'Ügyfél szerkesztése',biz_name:'Cégnév',biz_ph:'pl. Aranyhíd Szálloda',type:'Típus',
+ contact:'Kapcsolattartó',contact_ph:'pl. Kata, séf',phone:'Telefon',address:'Cím',city:'Város',
+ notes_ph:'Szállítási napok, fagyasztókapacitás, ki dönt',choose_client:'Válassz ügyfelet',client:'Ügyfél',date:'Dátum',
+ note_opt:'Megjegyzés (nem kötelező)',note_ph:'pl. Csütörtök reggel szállítás',save_order:'Mentés',edit_order:'Rendelés szerkesztése',
+ delete_order:'Rendelés törlése',delete_order_confirm:'Koppints újra a törléshez',
+ order_needs_client:'Minden rendelés egy ügyfélhez tartozik. Előbb vedd fel a szállodát, bárt vagy éttermet.',
+ unit_line:'nettó {p}, jutalék {c}',foot_line:'{n} db, nettó {net}, bruttó {gross}',what_happened:'Mi történt',
+ close:'Bezárás',less:'Eggyel kevesebb: {n}',more:'Eggyel több: {n}',
+ signin_title:'Jelentkezz be',signin_body:'A CRM a claude.ai fiókodba menti az ügyfeleket és rendeléseket. Nyisd meg a Claude-ban bejelentkezve.',
+ readonly_title:'Körülnézhetsz, de semmi nem mentődik',readonly_body:'Kérj a CRM tulajdonosától szerkesztési jogot (Contributor vagy Editor), majd töltsd újra az oldalt.',
+ save_failed:'Nem sikerült menteni. Ellenőrizd a kapcsolatot, és próbáld újra.',quota:'Az adatbázis megtelt. Törölj régi ügyfeleket vagy rendeléseket.',
+ product_name:'Termék neve',new_product:'Új termék',name_required:'Add meg a cégnevet',
+ type_Hotel:'Szálloda',type_Bar:'Bár',type_Restaurant:'Étterem',type_Sport:'Sport',type_Leisure:'Szabadidő',type_Children:'Gyerek',type_Other:'Egyéb',
+ members:'Csapattagok',add_member:'Új csapattag',new_member:'Új csapattag',edit_member:'Csapattag szerkesztése',
+ m_name:'Név',m_name_ph:'pl. Kovács Anna',position:'Beosztás',position_ph:'pl. Értékesítő',segment:'Szegmens',segment_ph:'pl. Szállodák, Budapest',
+ m_account:'CRM-fiók',m_not_linked:'Még nincs összekapcsolva',m_account_hint:'Ha már megosztottad vele a CRM-et és megnyitotta, itt válaszd ki a fiókját. Az eredményei ezután ezen a néven jelennek meg.',
+ members_empty:'Vedd fel az értékesítőket az elérhetőségeikkel. Ettől még nem kapnak hozzáférést: a Megosztás menüben is oszd meg velük a CRM-et.',
+ members_note:'Ezt a listát csak te és a CRM szerkesztői látjátok.',save_member:'Mentés',delete_member:'Eltávolítás a listából',delete_member_confirm:'Koppints újra az eltávolításhoz',
+ m_name_required:'Add meg a nevet',linked:'Használja a CRM-et',not_using:'Még nem használja a CRM-et',account_n:'{n}. fiók',
+ st_lead:'Érdeklődő',st_contacted:'Megkeresve',st_tasting:'Kóstoltatás',st_negotiating:'Tárgyalás',st_customer:'Ügyfél',st_lost:'Elveszett',
+ act_call:'Hívás',act_visit:'Látogatás',act_email:'E-mail',act_tasting:'Kóstoltatás',act_note:'Jegyzet',
+ csv_orders:'Dátum;Ügyfél;Típus;Város;Termék;Darab;Nettó egységár;Nettó összesen;Jutalék/db;Jutalék;Kifizetve;Megjegyzés',
+ csv_clients:'Név;Típus;Szakasz;Kapcsolattartó;Telefon;E-mail;Cím;Város;Következő teendő;Rendelések;Darab;Nettó forgalom;Jutalék;Jegyzetek',
+ yes:'Igen',no:'Nem'
+}};
+
+let lang = (function(){ try{ const v=localStorage.getItem('fz-lang'); if(v==='hu'||v==='en') return v; }catch(e){} return (navigator.language||'').toLowerCase().indexOf('hu')===0?'hu':'en'; })();
+function t(k,p){ let s=T[lang][k]; if(s==null) s=T.en[k]; if(s==null) return k; if(p) s=s.replace(/\{(\w+)\}/g,(m,x)=>p[x]!=null?p[x]:m); return s; }
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tx = (k,p) => esc(t(k,p));
+
+/* ---------- constants ---------- */
+const DEFAULT_CATALOG = { currency:'Ft', vat:27, products:[
+  {id:'margherita',name:'Margherita',price:1600,commission:160,active:true},
+  {id:'sonkas',name:'Sonkás',price:1890,commission:189,active:true},
+  {id:'szalamis',name:'Szalámis-Ventricina',price:1890,commission:189,active:true},
+  {id:'4sajtos',name:'4 sajtos',price:2100,commission:210,active:true},
+  {id:'vegan',name:'Zöldséges-vegán',price:1750,commission:175,active:true}
+]};
+const TYPES=['Hotel','Bar','Restaurant','Sport','Leisure','Children','Other'];
+const STAGES=['lead','contacted','tasting','negotiating','customer','lost'];
+const ACTS=['call','visit','email','tasting','note'];
+const MIX_OP=[1,.72,.52,.36,.24,.16,.1];
+
+/* ---------- icons ---------- */
+const P={
+ hotel:'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+ bar:'<path d="M8 22h8M7 10h10M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>',
+ restaurant:'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+ sport:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+ leisure:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+ children:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
+ other:'<path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.41l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+ phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
+ left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>',
+ search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',check:'<path d="M20 6 9 17l-5-5"/>',
+ home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+ users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+ orders:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"/>',
+ team:'<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+ settings:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ pencil:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+ download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+ pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'
+};
+const ic = n => '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+P[n]+'</svg>';
+const TYPE_ICON={Hotel:'hotel',Bar:'bar',Restaurant:'restaurant',Sport:'sport',Leisure:'leisure',Children:'children',Other:'other'};
+const typeIcon = ty => ic(TYPE_ICON[ty]||'other');
+
+/* ---------- helpers ---------- */
+const rid = p => p + (window.crypto&&crypto.getRandomValues ? Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>b.toString(36).padStart(2,'0')).join('').slice(0,12) : Math.random().toString(36).slice(2,14));
+const pad = n => String(n).padStart(2,'0');
+const toISO = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const todayISO = () => toISO(new Date());
+const parseISO = s => { const a=s.split('-').map(Number); return new Date(a[0],a[1]-1,a[2]); };
+const addDays = (s,n) => { const d=parseISO(s); d.setDate(d.getDate()+n); return toISO(d); };
+const daysBetween = (a,b) => Math.round((parseISO(b)-parseISO(a))/86400000);
+const monthKey = s => s.slice(0,7);
+const shiftMonth = (k,n) => { const a=k.split('-').map(Number); const d=new Date(a[0],a[1]-1+n,1); return d.getFullYear()+'-'+pad(d.getMonth()+1); };
+const loc = () => lang==='hu'?'hu-HU':'en-GB';
+const monthLabel = k => { const a=k.split('-').map(Number); return new Date(a[0],a[1]-1,1).toLocaleDateString(loc(),{month:'long',year:'numeric'}); };
+const monthName = k => { const a=k.split('-').map(Number); return new Date(a[0],a[1]-1,1).toLocaleDateString(loc(),{month:'long'}); };
+const fmtDate = (s,long) => s ? parseISO(s).toLocaleDateString(loc(), long?{weekday:'short',month:'short',day:'numeric'}:{month:'short',day:'numeric'}) : '';
+function relDay(s){ const n=daysBetween(todayISO(),s); if(n===0) return t('today'); if(n===1) return t('tomorrow'); if(n===-1) return t('overdue1'); if(n<0) return t('overdueN',{n:-n}); return t('inN',{n:n,d:fmtDate(s,true)}); }
+const num = v => { const n=parseFloat(String(v).replace(/\s/g,'').replace(',','.')); return isFinite(n)?n:0; };
+const cur = () => S.catalog.currency||'Ft';
+const nf = n => Math.round(n||0).toLocaleString(loc());
+const money = n => nf(n)+' '+cur();
+const totalsOf = o => (o.lines||[]).reduce((a,l)=>({qty:a.qty+l.qty,net:a.net+l.qty*l.price,commission:a.commission+l.qty*l.commission}),{qty:0,net:0,commission:0});
+const sumTotals = os => os.reduce((a,o)=>{ const x=totalsOf(o); return {qty:a.qty+x.qty,net:a.net+x.net,commission:a.commission+x.commission}; },{qty:0,net:0,commission:0});
+const lastOrderMap = os => { const m={}; os.forEach(o=>{ if(!m[o.clientId]||o.date>m[o.clientId]) m[o.clientId]=o.date; }); return m; };
+const byName = (a,b) => a.name.localeCompare(b.name, loc());
+
+/* ---------- state ---------- */
+const S = {
+  phase:'loading', loaded:false, db:null, user:null, uid:null, isAdmin:false, readonly:false,
+  clients:{}, orders:{}, settings:{target:150000, reorderDays:21},
+  catalog:DEFAULT_CATALOG,
+  tab:'home', clientId:null, sheet:null,
+  cf:{q:'',type:'All',stage:'all'}, om:monthKey(todayISO()), of:'all', tm:monthKey(todayISO()),
+  team:{ids:[],data:{},names:{}}, members:{},
+  pending:0, saveErr:false, deferred:false,
+  draft:null, touched:false
+};
+const clientsArr = () => Object.values(S.clients);
+const ordersArr = () => Object.values(S.orders);
+
+/* ---------- persistence ---------- */
+let chain = Promise.resolve();
+function persist(fn, own){
+  S.pending++; paintStatus();
+  const run = async () => {
+    try { await fn(); }
+    catch(e){
+      if(e && e.code==='unavailable'){ await new Promise(r=>setTimeout(r,400+Math.random()*500)); await fn(); }
+      else throw e;
+    }
+  };
+  chain = chain.catch(()=>{}).then(run).then(()=>{ S.saveErr=false; }, e=>{
+    S.saveErr=true;
+    const code = e && e.code;
+    if(code==='invalid_argument' && own){ if(!S.readonly){ S.readonly=true; render(); } }
+    else toast(code==='quota_exceeded'?t('quota'):t('save_failed'));
+  }).finally(()=>{ S.pending--; paintStatus(); });
+  return chain;
+}
+const myCol = () => S.db.collection('data/users/'+S.uid);
+const putDoc = (id, body) => persist(()=>myCol().doc(id).set(body), true);
+const delDoc = id => persist(()=>myCol().doc(id).delete(), true);
+const clone = o => JSON.parse(JSON.stringify(o));
+
+function statusHTML(){
+  if(S.phase!=='ready') return '';
+  if(S.pending>0) return tx('saving');
+  if(S.saveErr) return tx('not_saved');
+  return ic('check')+tx('saved');
+}
+function paintStatus(){ document.querySelectorAll('.status').forEach(el=>{ el.innerHTML=statusHTML(); el.classList.toggle('err', S.saveErr && !S.pending); }); }
+
+let toastTimer;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{el.hidden=true;},2600); }
+
+/* ---------- rendering ---------- */
+function inMainField(){ const a=document.activeElement; return a && a.closest && a.closest('#main') && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
+function scheduleRender(){ if(inMainField()){ S.deferred=true; return; } render(); }
+document.addEventListener('focusout', ()=>{ if(!S.deferred) return; setTimeout(()=>{ if(!inMainField()){ S.deferred=false; render(); } },0); });
+
+function render(){
+  document.documentElement.lang = lang;
+  const main = document.getElementById('main');
+  let html;
+  if(S.phase==='signedout') html = header(t('nav_home'),'')+'<div class="gate"><h2>'+tx('signin_title')+'</h2><p>'+tx('signin_body')+'</p></div>';
+  else {
+    const c = S.clientId && S.clients[S.clientId];
+    if(S.clientId && !c && S.loaded) S.clientId=null;
+    html = c ? viewClient(c) : S.tab==='clients' ? viewClients() : S.tab==='orders' ? viewOrders() : S.tab==='team' && S.isAdmin ? viewTeam() : S.tab==='settings' ? viewSettings() : viewHome();
+    if(S.readonly) html = '<div class="banner"><b>'+tx('readonly_title')+'</b>'+tx('readonly_body')+'</div>'+html;
+  }
+  main.innerHTML = html;
+  renderNav(); renderFab(); renderSavebar(); paintStatus();
+}
+
+function header(title, sub, right){
+  return '<header class="hdr"><div class="hdr-txt"><div class="brand">FREEZBEE</div><h1>'+esc(title)+'</h1>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+'</div><div class="hdr-r"><span class="status"></span>'+(right||'')+'</div></header>';
+}
+function section(title, body, aside){ return '<section class="sec"><div class="sec-h"><h2>'+esc(title)+'</h2>'+(aside?'<span class="aside">'+aside+'</span>':'')+'</div>'+body+'</section>'; }
+function stageBadge(id){ return '<span class="badge" style="--c:var(--st-'+id+')">'+tx('st_'+id)+'</span>'; }
+function callLink(c){ if(!c.phone) return ''; return '<a class="callbtn tap" href="tel:'+esc(c.phone.replace(/[^\d+]/g,''))+'" aria-label="'+tx('call')+' '+esc(c.name)+'">'+ic('phone')+'</a>'; }
+function clientRow(c, sub, subCls, right){
+  return '<div class="row"><button class="row-main tap" data-act="open-client" data-id="'+esc(c.id)+'"><span class="avatar">'+typeIcon(c.type)+'</span><span class="rt"><b>'+esc(c.name)+'</b>'+(sub?'<span class="'+(subCls||'')+'">'+esc(sub)+'</span>':'')+'</span></button>'+(right||'')+'</div>';
+}
+function productName(l){ const p=S.catalog.products.find(x=>x.id===l.pizzaId); return p?p.name:(l.name||'?'); }
+function orderRow(o, showClient){
+  const tt=totalsOf(o); const c=S.clients[o.clientId];
+  const breakdown=(o.lines||[]).filter(l=>l.qty>0).map(l=>l.qty+' '+productName(l)).join(', ');
+  const title = showClient ? (c?c.name:'—') : fmtDate(o.date,true);
+  const sub1 = showClient ? fmtDate(o.date)+': '+breakdown : breakdown;
+  return '<div class="orow"><button class="orow-main tap" data-act="open-order" data-id="'+esc(o.id)+'"><b>'+esc(title)+'</b><span>'+esc(sub1)+'</span><span>'+tx('pieces_net',{n:nf(tt.qty),v:money(tt.net)})+'</span></button>'+
+    '<div class="orow-r"><span class="earn">+'+esc(money(tt.commission))+'</span><button class="paid tap '+(o.paid?'yes':'no')+'" data-act="toggle-paid" data-id="'+esc(o.id)+'" aria-pressed="'+(o.paid?'true':'false')+'">'+tx(o.paid?'paid_out':'unpaid')+'</button></div></div>';
+}
+
+/* --- Today --- */
+function viewHome(){
+  const today=todayISO(), mk=monthKey(today);
+  const clients=clientsArr(), orders=ordersArr();
+  const mo=orders.filter(o=>monthKey(o.date)===mk);
+  const tt=sumTotals(mo);
+  const target=num(S.settings.target);
+  const pct = target>0 ? Math.min(100,Math.round(tt.commission/target*100)) : 0;
+  const unpaid=sumTotals(orders.filter(o=>!o.paid)).commission;
+  // product mix
+  const mixMap={}; mo.forEach(o=>(o.lines||[]).forEach(l=>{ mixMap[l.pizzaId]=(mixMap[l.pizzaId]||0)+l.qty; }));
+  const mix=S.catalog.products.filter(p=>p.active!==false||mixMap[p.id]).map(p=>({name:p.name,qty:mixMap[p.id]||0}));
+  Object.keys(mixMap).forEach(id=>{ if(!S.catalog.products.some(p=>p.id===id)){ const l=mo.flatMap(o=>o.lines||[]).find(x=>x.pizzaId===id); mix.push({name:l?l.name:id,qty:mixMap[id]}); } });
+
+  let h = header(t('nav_home'), new Date().toLocaleDateString(loc(),{weekday:'long',month:'long',day:'numeric'}));
+  if(S.phase==='loading' || (S.phase==='ready' && !S.loaded)) h += '<p class="note" style="margin:0 4px 12px">'+tx('loading')+'</p>';
+  else if(S.phase==='ready' && clients.length===0) h += '<div class="start"><h2>'+tx('start_title')+'</h2><p>'+tx('start_body')+'</p><button class="btn btn-ink tap" data-act="add-client">'+ic('plus')+tx('add_client')+'</button></div>';
+
+  h += '<section class="ticket" aria-label="'+tx('commission_in',{m:monthName(mk)})+'"><div class="t-top"><p class="t-lbl">'+tx('commission_in',{m:monthName(mk)})+'</p><p class="t-big">'+esc(money(tt.commission))+'</p>';
+  if(target>0) h += '<div class="bar"><i style="width:'+pct+'%"></i></div><div class="bar-txt"><span>'+tx('goal_pct',{p:pct,g:money(target)})+'</span><span>'+(tt.commission>=target?tx('goal_reached'):tx('to_go',{v:money(target-tt.commission)}))+'</span></div>';
+  h += '</div><div class="perf"></div><div class="t-bot"><div class="t-stats">'+
+    '<div class="t-stat"><b>'+nf(tt.qty)+'</b><span>'+tx('pizzas_sold')+'</span></div>'+
+    '<div class="t-stat"><b>'+esc(money(tt.net))+'</b><span>'+tx('net_sales')+'</span></div>'+
+    '<div class="t-stat"><b>'+esc(money(unpaid))+'</b><span>'+tx('not_paid')+'</span></div></div>';
+  h += '<div class="mix">'+(tt.qty>0?mix.map((p,i)=>p.qty>0?'<i style="width:'+(p.qty/tt.qty*100)+'%;opacity:'+MIX_OP[i%MIX_OP.length]+'"></i>':'').join(''):'')+'</div>';
+  h += '<div class="legend">'+mix.map((p,i)=>'<div><span class="dot" style="opacity:'+MIX_OP[i%MIX_OP.length]+'"></span><span class="nm">'+esc(p.name)+'</span><b>'+nf(p.qty)+'</b></div>').join('')+'</div></div></section>';
+
+  const fus=clients.filter(c=>c.stage!=='lost'&&c.nextFollowUp&&c.nextFollowUp<=addDays(today,7)).sort((a,b)=>a.nextFollowUp.localeCompare(b.nextFollowUp)).slice(0,10);
+  h += section(t('followups'), fus.length ? '<div class="card">'+fus.map(c=>clientRow(c, relDay(c.nextFollowUp), c.nextFollowUp<today?'late':c.nextFollowUp===today?'soon':'', callLink(c))).join('')+'</div>' : '<div class="empty">'+tx('followups_empty')+'</div>');
+
+  const lo=lastOrderMap(orders);
+  const re=clients.filter(c=>c.stage==='customer'&&lo[c.id]&&daysBetween(lo[c.id],today)>=num(S.settings.reorderDays||21)).map(c=>({c:c,d:daysBetween(lo[c.id],today)})).sort((a,b)=>b.d-a.d).slice(0,8);
+  if(re.length) h += section(t('reorder_due'), '<div class="card">'+re.map(x=>clientRow(x.c, t('last_order_ago',{n:x.d}), '', callLink(x.c))).join('')+'</div>');
+
+  const bc={}; mo.forEach(o=>{ bc[o.clientId]=(bc[o.clientId]||0)+totalsOf(o).commission; });
+  const top=Object.keys(bc).map(id=>({c:S.clients[id],v:bc[id]})).filter(x=>x.c).sort((a,b)=>b.v-a.v).slice(0,5);
+  if(top.length) h += section(t('best_clients'), '<div class="card">'+top.map(x=>clientRow(x.c, x.c.city||t('type_'+x.c.type), '', '<span class="earn">+'+esc(money(x.v))+'</span>')).join('')+'</div>');
+
+  if(clients.length) h += section(t('pipeline'), '<div class="pipe">'+STAGES.map(s=>'<button class="tap" style="--c:var(--st-'+s+')" data-act="go-stage" data-stage="'+s+'"><b>'+clients.filter(c=>c.stage===s).length+'</b><span>'+tx('st_'+s)+'</span></button>').join('')+'</div>');
+  return h;
+}
+
+/* --- Clients --- */
+function filteredClients(){
+  const q=S.cf.q.trim().toLowerCase();
+  return clientsArr().filter(c=>S.cf.type==='All'||c.type===S.cf.type).filter(c=>S.cf.stage==='all'||c.stage===S.cf.stage)
+    .filter(c=>!q||[c.name,c.city,c.contact,c.phone].filter(Boolean).join(' ').toLowerCase().indexOf(q)>=0).sort(byName);
+}
+function clientListHTML(){
+  const all=clientsArr(); const list=filteredClients(); const today=todayISO();
+  if(!list.length) return '<div class="empty">'+tx(all.length?'clients_nomatch':'clients_empty')+'</div>';
+  return '<div class="card">'+list.map(c=>{
+    const due=c.nextFollowUp&&c.nextFollowUp<=today&&c.stage!=='lost';
+    const sub=due?t('followup_prefix',{r:relDay(c.nextFollowUp)}):([c.city,c.contact].filter(Boolean).join(', ')||t('type_'+c.type));
+    return clientRow(c, sub, due?'late':'', stageBadge(c.stage));
+  }).join('')+'</div>';
+}
+function viewClients(){
+  const all=clientsArr(); const buying=all.filter(c=>c.stage==='customer').length;
+  let h=header(t('nav_clients'), all.length?t('clients_sub',{n:all.length,b:buying}):t('no_clients_yet'), S.phase==='ready'?'<button class="pill pill-ink tap" data-act="add-client">'+ic('plus')+tx('add_client')+'</button>':'');
+  h += '<div class="search">'+ic('search')+'<input id="q" type="search" value="'+esc(S.cf.q)+'" placeholder="'+tx('search_ph')+'" aria-label="'+tx('search_ph')+'" autocomplete="off"></div>';
+  h += '<div class="chips scroll" style="margin-top:12px">'+['All'].concat(TYPES).map(ty=>'<button class="chip tap" data-act="f-type" data-v="'+ty+'" aria-pressed="'+(S.cf.type===ty)+'">'+(ty==='All'?tx('all_types'):tx('type_'+ty))+'</button>').join('')+'</div>';
+  h += '<div class="chips scroll" style="margin-top:8px">'+['all'].concat(STAGES).map(s=>'<button class="chip tap" data-act="f-stage" data-v="'+s+'" aria-pressed="'+(S.cf.stage===s)+'"'+(s!=='all'?' style="--c:var(--st-'+s+')"':'')+'>'+(s==='all'?tx('all_stages'):tx('st_'+s))+'</button>').join('')+'</div>';
+  h += '<div id="clist" style="margin-top:16px">'+clientListHTML()+'</div>';
+  return h;
+}
+
+/* --- Client detail --- */
+function viewClient(c){
+  const today=todayISO();
+  const orders=ordersArr().filter(o=>o.clientId===c.id).sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0));
+  const tt=sumTotals(orders);
+  const place=[c.address,c.city].filter(Boolean).join(', ');
+  let h='<div class="back-row"><button class="back tap" data-act="back">'+ic('left')+tx('back')+'</button><div style="display:flex;align-items:center;gap:10px"><span class="status"></span><button class="pill tap" data-act="edit-client">'+ic('pencil')+tx('edit')+'</button></div></div>';
+  h+='<div class="cd-meta">'+typeIcon(c.type)+'<span>'+esc([t('type_'+c.type),c.city].filter(Boolean).join(', '))+'</span></div>';
+  h+='<h1 class="cd-name">'+esc(c.name)+'</h1>';
+  if(c.contact) h+='<div class="cd-contact">'+esc(c.contact)+'</div>';
+  if(c.phone||c.email||place){
+    h+='<div class="contact-list">';
+    if(c.phone) h+='<div class="cline"><span class="val num">'+esc(c.phone)+'</span><button class="mini tap" data-act="copy" data-text="'+esc(c.phone)+'">'+tx('copy')+'</button><a class="mini go tap" href="tel:'+esc(c.phone.replace(/[^\d+]/g,''))+'">'+tx('call')+'</a></div>';
+    if(c.email) h+='<div class="cline"><span class="val">'+esc(c.email)+'</span><button class="mini tap" data-act="copy" data-text="'+esc(c.email)+'">'+tx('copy')+'</button><a class="mini tap" href="mailto:'+esc(c.email)+'">'+tx('email')+'</a></div>';
+    if(place) h+='<div class="cline"><span class="val">'+esc(place)+'</span><a class="mini tap" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(place)+'">'+tx('directions')+'</a></div>';
+    h+='</div>';
+  }
+  h+='<div style="margin-top:18px" class="stats3"><div><b>'+nf(tt.qty)+'</b><span>'+tx('pieces_bought')+'</span></div><div><b>'+esc(money(tt.net))+'</b><span>'+tx('net_sales')+'</span></div><div><b class="acc">'+esc(money(tt.commission))+'</b><span>'+tx('your_commission')+'</span></div></div>';
+  h+='<div class="grid2" style="margin-top:10px"><button class="btn btn-ink tap" data-act="log-order" data-client="'+esc(c.id)+'">'+ic('plus')+tx('log_order')+'</button><button class="btn btn-plain tap" data-act="log-activity">'+ic('plus')+tx('log_activity')+'</button></div>';
+
+  h+=section(t('stage'), '<div class="chips scroll">'+STAGES.map(s=>'<button class="chip tap" style="--c:var(--st-'+s+')" data-act="set-stage" data-v="'+s+'" aria-pressed="'+(c.stage===s)+'">'+tx('st_'+s)+'</button>').join('')+'</div>');
+
+  const fu=c.nextFollowUp; const late=fu&&fu<today;
+  let f='<div class="fu"><div class="fu-top">'+ic('cal')+'<div class="rt"><b>'+(fu?esc(fmtDate(fu,true)):tx('not_set'))+'</b>'+(fu?'<span class="'+(late?'late':'')+'">'+esc(relDay(fu))+'</span>':'')+'</div>'+(fu?'<button class="mini-btn tap" data-act="fu-clear">'+tx('clear')+'</button>':'')+'</div>';
+  f+='<div class="chips" style="margin-top:12px">'+[['tomorrow',1],['in3',3],['next_week',7],['in2w',14]].map(x=>'<button class="chip tap" data-act="fu-quick" data-d="'+x[1]+'">'+tx(x[0])+'</button>').join('')+'</div>';
+  f+='<input id="fu-date" class="input" type="date" style="margin-top:12px" value="'+esc(fu||'')+'" aria-label="'+tx('pick_date')+'"></div>';
+  h+=section(t('next_followup'), f);
+
+  h+=section(t('orders'), orders.length?'<div class="card">'+orders.map(o=>orderRow(o,false)).join('')+'</div>':'<div class="empty">'+tx('orders_empty_client',{n:c.name})+'</div>', orders.length?tx('last_on',{d:fmtDate(orders[0].date)}):'');
+
+  const acts=(c.activities||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  h+=section(t('activity'), acts.length?'<div class="card">'+acts.map(a=>'<div class="act"><div class="rt"><b>'+tx('act_'+a.type)+' <span style="display:inline;color:var(--soft);font-weight:400;font-size:14px">'+esc(fmtDate(a.date))+'</span></b>'+(a.text?'<div class="txt">'+esc(a.text)+'</div>':'')+'</div><button class="x tap" data-act="del-activity" data-id="'+esc(a.id)+'" aria-label="'+tx('clear')+'">'+ic('x')+'</button></div>').join('')+'</div>':'<div class="empty">'+tx('activity_empty')+'</div>');
+  if(c.notes) h+=section(t('notes'), '<div class="panel" style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(c.notes)+'</div>');
+  h+='<div class="sec"><button class="btn btn-danger tap" data-act="del-client" data-confirm="'+tx('delete_client_confirm')+'">'+tx('delete_client')+'</button></div>';
+  return h;
+}
+
+/* --- Orders --- */
+function viewOrders(){
+  const mo=ordersArr().filter(o=>monthKey(o.date)===S.om).sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0));
+  const shown=mo.filter(o=>S.of==='all'?true:S.of==='unpaid'?!o.paid:o.paid);
+  const tt=sumTotals(mo); const up=mo.filter(o=>!o.paid); const upv=sumTotals(up).commission;
+  let h=header(t('nav_orders'), t('orders_sub'));
+  h+='<div class="monthnav"><button class="tap" data-act="om" data-d="-1" aria-label="‹">'+ic('left')+'</button><span>'+esc(monthLabel(S.om))+'</span><button class="tap" data-act="om" data-d="1" aria-label="›">'+ic('right')+'</button></div>';
+  h+='<div class="tiles"><div class="tile"><b class="acc">'+esc(money(tt.commission))+'</b><span>'+tx('commission')+'</span></div><div class="tile"><b class="'+(upv>0?'warn':'')+'">'+esc(money(upv))+'</b><span>'+tx('not_paid')+'</span></div><div class="tile"><b>'+nf(tt.qty)+'</b><span>'+tx('pizzas_sold')+'</span></div><div class="tile"><b>'+esc(money(tt.net))+'</b><span>'+tx('net_sales')+'</span></div></div>';
+  if(up.length) h+='<button class="btn btn-line tap" style="margin-top:10px;color:var(--good)" data-act="mark-all-paid">'+ic('check')+tx('mark_all_paid',{n:up.length})+'</button>';
+  h+='<div class="chips" style="margin-top:20px">'+[['all','all'],['unpaid','unpaid'],['paid','paid_out']].map(x=>'<button class="chip tap" data-act="of" data-v="'+x[0]+'" aria-pressed="'+(S.of===x[0])+'">'+tx(x[1])+'</button>').join('')+'</div>';
+  h+='<div style="margin-top:12px">';
+  if(!shown.length) h+='<div class="empty">'+(mo.length?tx('orders_nomatch'):tx('orders_empty_month',{m:monthLabel(S.om)}))+'</div>';
+  else h+='<div class="card">'+shown.map(o=>orderRow(o,true)).join('')+'</div><p class="note">'+tx('paid_hint')+'</p>';
+  h+='</div>';
+  if(S.phase==='ready') h+='<div class="grid2 sec"><button class="btn btn-plain tap" data-act="export" data-kind="orders">'+ic('download')+tx('export_orders')+'</button><button class="btn btn-plain tap" data-act="export" data-kind="clients">'+ic('download')+tx('export_clients')+'</button></div>';
+  return h;
+}
+
+/* --- Team --- */
+function viewTeam(){
+  let h=header(t('nav_team'), t('team_sub'));
+  h+='<div class="monthnav"><button class="tap" data-act="tm" data-d="-1" aria-label="‹">'+ic('left')+'</button><span>'+esc(monthLabel(S.tm))+'</span><button class="tap" data-act="tm" data-d="1" aria-label="›">'+ic('right')+'</button></div>';
+  const ids=S.team.ids;
+  if(!ids.length) return h+'<div class="empty" style="margin-top:12px">'+tx('team_empty')+'</div>'+membersSection();
+  const rows=ids.map(id=>{
+    const d=S.team.data[id]||{clients:0,orders:[]};
+    const mo=d.orders.filter(o=>monthKey(o.date)===S.tm);
+    const tt=sumTotals(mo); const up=sumTotals(mo.filter(o=>!o.paid)).commission;
+    return {id:id,name:repName(id),me:id===S.uid,clients:d.clients,qty:tt.qty,net:tt.net,com:tt.commission,up:up};
+  }).sort((a,b)=>b.com-a.com||a.name.localeCompare(b.name,loc()));
+  const tot=rows.reduce((a,r)=>({clients:a.clients+r.clients,qty:a.qty+r.qty,net:a.net+r.net,com:a.com+r.com,up:a.up+r.up}),{clients:0,qty:0,net:0,com:0,up:0});
+  h+='<div class="team-wrap" style="margin-top:12px"><table><thead><tr><th>'+tx('rep')+'</th><th>'+tx('clients_lbl')+'</th><th>'+tx('pizzas_sold')+'</th><th>'+tx('net_sales')+'</th><th>'+tx('commission')+'</th><th>'+tx('not_paid')+'</th></tr></thead><tbody>'+
+    rows.map(r=>'<tr><td>'+esc(r.name)+(r.me?' <span class="me">'+tx('you')+'</span>':'')+'</td><td>'+nf(r.clients)+'</td><td>'+nf(r.qty)+'</td><td>'+esc(money(r.net))+'</td><td class="acc">'+esc(money(r.com))+'</td><td>'+esc(money(r.up))+'</td></tr>').join('')+
+    '<tr class="tot"><td>'+tx('total')+'</td><td>'+nf(tot.clients)+'</td><td>'+nf(tot.qty)+'</td><td>'+esc(money(tot.net))+'</td><td class="acc">'+esc(money(tot.com))+'</td><td>'+esc(money(tot.up))+'</td></tr></tbody></table></div>';
+  return h+membersSection();
+}
+const memberByUid = id => Object.values(S.members).find(m=>m.uid===id);
+function repName(id){ const m=memberByUid(id); if(m&&m.name) return m.name; const nm=S.team.names[id]; return (nm&&nm.name)||t('rep_someone'); }
+function accountLabel(id){ const nm=S.team.names[id]; return (nm&&nm.name)||t('account_n',{n:S.team.ids.indexOf(id)+1}); }
+function membersSection(){
+  const list=Object.values(S.members).sort((a,b)=>a.name.localeCompare(b.name,loc()));
+  let b='';
+  if(!list.length) b='<div class="empty">'+tx('members_empty')+'</div>';
+  else b='<div class="card">'+list.map(m=>{
+    const sub=[m.position,m.segment].filter(Boolean).join(', ')||[m.phone,m.email].filter(Boolean).join(', ');
+    const on=m.uid && S.team.ids.indexOf(m.uid)>=0;
+    return '<div class="row"><button class="row-main tap" data-act="open-member" data-id="'+esc(m.id)+'"><span class="avatar">'+ic('users')+'</span><span class="rt"><b>'+esc(m.name)+'</b>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</span></button><span class="badge" style="--c:'+(on?'var(--good)':'var(--st-lost)')+'">'+tx(on?'linked':'not_using')+'</span></div>';
+  }).join('')+'</div>';
+  b+='<button class="btn btn-ink tap" style="margin-top:10px" data-act="add-member">'+ic('plus')+tx('add_member')+'</button><p class="note">'+tx('members_note')+'</p>';
+  return section(t('members'), b);
+}
+
+/* --- Settings --- */
+function initDraft(){
+  S.draft = { target:String(S.settings.target!=null?S.settings.target:''), reorderDays:String(S.settings.reorderDays||21), vat:String(S.catalog.vat!=null?S.catalog.vat:27),
+    products:S.catalog.products.map(p=>({id:p.id,name:p.name,price:String(p.price),commission:String(p.commission),active:p.active!==false})) };
+  S.touched=false;
+}
+function viewSettings(){
+  if(!S.draft || !S.touched) initDraft();
+  const d=S.draft; const c=cur();
+  let h=header(t('nav_settings'), t('settings_sub'));
+  h+=section(t('language'), '<div class="chips">'+[['hu','Magyar'],['en','English']].map(x=>'<button class="chip tap" data-act="lang" data-v="'+x[0]+'" aria-pressed="'+(lang===x[0])+'">'+x[1]+'</button>').join('')+'</div>');
+  h+=section(t('goals'), '<div class="panel"><label class="field"><span class="lbl">'+tx('goal_label',{c:c})+'</span><input id="s-target" class="input num" inputmode="numeric" data-draft="target" value="'+esc(d.target)+'"></label><label class="field"><span class="lbl">'+tx('reorder_label')+'</span><input id="s-reorder" class="input num" inputmode="numeric" data-draft="reorderDays" value="'+esc(d.reorderDays)+'"></label></div>');
+  let p='';
+  if(S.isAdmin){
+    p+='<p class="note" style="margin:0 4px 12px">'+tx('products_hint_admin')+'</p>';
+    p+=d.products.map((x,i)=>{
+      const pr=num(x.price), cm=num(x.commission);
+      return '<div class="prod'+(x.active?'':' off')+'"><input id="p-name-'+i+'" class="prod-name" data-prod="'+i+'" data-field="name" value="'+esc(x.name)+'" placeholder="'+tx('product_name')+'" aria-label="'+tx('product_name')+'">'+
+        '<div class="grid2" style="margin-top:12px;gap:12px"><label class="field"><span class="lbl">'+tx('net_price',{c:c})+'</span><input id="p-price-'+i+'" class="input num" inputmode="numeric" data-prod="'+i+'" data-field="price" value="'+esc(x.price)+'"></label><label class="field"><span class="lbl">'+tx('commission_per',{c:c})+'</span><input id="p-com-'+i+'" class="input num" inputmode="numeric" data-prod="'+i+'" data-field="commission" value="'+esc(x.commission)+'"></label></div>'+
+        '<div class="prod-foot"><span>'+(x.active?(pr>0?tx('pct_of_price',{p:Math.round(cm/pr*1000)/10}):''):tx('hidden'))+'</span><button class="mini-btn tap" data-act="prod-toggle" data-i="'+i+'">'+tx(x.active?'hide_product':'show_product')+'</button></div></div>';
+    }).join('');
+    p+='<button class="btn btn-line tap" style="margin-top:10px" data-act="prod-add">'+ic('plus')+tx('add_product')+'</button>';
+    p+='<div class="panel" style="margin-top:10px"><label class="field"><span class="lbl">'+tx('vat_label')+'</span><input id="s-vat" class="input num" inputmode="numeric" data-draft="vat" value="'+esc(d.vat)+'"></label></div>';
+  } else {
+    p+='<p class="note" style="margin:0 4px 12px">'+tx('products_hint_rep')+'</p><div class="card">'+S.catalog.products.filter(x=>x.active!==false).map(x=>'<div class="prod-ro"><b>'+esc(x.name)+'</b><span>'+tx('unit_line',{p:money(x.price),c:money(x.commission)})+'</span></div>').join('')+'</div>';
+  }
+  h+=section(t('products'), p);
+  h+=section(t('your_data'), '<p class="note" style="margin:0 4px 12px">'+tx('data_note')+'</p>'+(S.phase==='ready'?'<div class="grid2"><button class="btn btn-plain tap" data-act="export" data-kind="orders">'+ic('download')+tx('export_orders')+'</button><button class="btn btn-plain tap" data-act="export" data-kind="clients">'+ic('download')+tx('export_clients')+'</button></div>':''));
+  return h;
+}
+function renderSavebar(){
+  const slot=document.getElementById('savebarSlot');
+  const show = S.tab==='settings' && !S.clientId && S.touched && S.phase==='ready';
+  slot.innerHTML = show ? '<div class="savebar"><button class="btn btn-pink tap" data-act="save-settings">'+tx('save_changes')+'</button></div>' : '';
+}
+
+/* --- nav & fab --- */
+function renderNav(){
+  const items=[['home','home'],['clients','users'],['orders','orders']];
+  if(S.isAdmin) items.push(['team','team']);
+  items.push(['settings','settings']);
+  const cur=S.clientId?'clients':S.tab;
+  document.getElementById('nav').innerHTML='<div class="nav-in">'+items.map(x=>'<button class="tap" data-act="nav" data-tab="'+x[0]+'"'+(cur===x[0]?' aria-current="page"':'')+'>'+ic(x[1])+'<span>'+tx('nav_'+x[0])+'</span><i></i></button>').join('')+'</div>';
+}
+function renderFab(){
+  const show = S.phase==='ready' && !S.clientId && (S.tab==='home'||S.tab==='clients'||S.tab==='orders');
+  document.getElementById('fab').innerHTML = show ? '<button class="fab tap" data-act="log-order">'+ic('plus')+tx('log_order')+'</button>' : '';
+}
+
+/* ---------- sheets ---------- */
+let prevOverflow='';
+function renderSheet(){
+  const host=document.getElementById('sheet');
+  const s=S.sheet;
+  if(!s){ host.innerHTML=''; document.body.style.overflow=prevOverflow; return; }
+  if(!host.innerHTML) prevOverflow=document.body.style.overflow;
+  document.body.style.overflow='hidden';
+  let title='', body='', foot='';
+  if(s.kind==='client'){
+    const f=s.f; title=t(s.id?'edit_client':'new_client');
+    body='<label class="field"><span class="lbl">'+tx('biz_name')+'</span><input id="cf-name" class="input" value="'+esc(f.name)+'" placeholder="'+tx('biz_ph')+'" autocomplete="off"></label>'+
+      '<div class="field"><span class="lbl">'+tx('type')+'</span><div class="chips" data-group="type">'+TYPES.map(ty=>'<button class="chip tap" data-act="chip" data-v="'+ty+'" aria-pressed="'+(f.type===ty)+'">'+tx('type_'+ty)+'</button>').join('')+'</div></div>'+
+      '<label class="field"><span class="lbl">'+tx('contact')+'</span><input id="cf-contact" class="input" value="'+esc(f.contact)+'" placeholder="'+tx('contact_ph')+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('phone')+'</span><input id="cf-phone" class="input" type="tel" value="'+esc(f.phone)+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('email')+'</span><input id="cf-email" class="input" type="email" value="'+esc(f.email)+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('address')+'</span><input id="cf-address" class="input" value="'+esc(f.address)+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('city')+'</span><input id="cf-city" class="input" value="'+esc(f.city)+'"></label>'+
+      '<div class="field"><span class="lbl">'+tx('stage')+'</span><div class="chips" data-group="stage">'+STAGES.map(st=>'<button class="chip tap" style="--c:var(--st-'+st+')" data-act="chip" data-v="'+st+'" aria-pressed="'+(f.stage===st)+'">'+tx('st_'+st)+'</button>').join('')+'</div></div>'+
+      '<label class="field"><span class="lbl">'+tx('next_followup')+'</span><input id="cf-fu" class="input" type="date" value="'+esc(f.nextFollowUp)+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('notes')+'</span><textarea id="cf-notes" class="input" rows="3" placeholder="'+tx('notes_ph')+'">'+esc(f.notes)+'</textarea></label>';
+    foot='<button class="btn btn-ink tap" data-act="save-client">'+tx(s.id?'save_changes':'add_client')+'</button>';
+  } else if(s.kind==='order'){
+    title=t(s.id?'edit_order':'log_order');
+    const clients=clientsArr().sort(byName);
+    if(!clients.length){
+      body='<div class="empty">'+tx('order_needs_client')+'</div><button class="btn btn-ink tap" style="margin-top:12px" data-act="add-client">'+ic('plus')+tx('add_client')+'</button>';
+    } else {
+      body='<label class="field"><span class="lbl">'+tx('client')+'</span><select id="o-client" class="sel"><option value="">'+tx('choose_client')+'</option>'+clients.map(c=>'<option value="'+esc(c.id)+'"'+(s.clientId===c.id?' selected':'')+'>'+esc(c.name+(c.city?', '+c.city:''))+'</option>').join('')+'</select></label>'+
+        '<label class="field"><span class="lbl">'+tx('date')+'</span><input id="o-date" class="input" type="date" value="'+esc(s.date)+'"></label>'+
+        '<div class="field">'+orderProducts().map(p=>'<div class="prow"><div class="rt"><b>'+esc(p.name)+'</b><span>'+tx('unit_line',{p:money(p.price),c:money(p.commission)})+'</span></div><div class="step"><button class="tap" data-act="step" data-p="'+esc(p.id)+'" data-d="-1" aria-label="'+tx('less',{n:p.name})+'">'+ic('minus')+'</button><input class="'+(s.qty[p.id]?'on':'')+'" inputmode="numeric" data-qty="'+esc(p.id)+'" value="'+(s.qty[p.id]||'')+'" placeholder="0" aria-label="'+esc(p.name)+'"><button class="tap" data-act="step" data-p="'+esc(p.id)+'" data-d="1" aria-label="'+tx('more',{n:p.name})+'">'+ic('plus')+'</button></div></div>').join('')+'</div>'+
+        '<label class="field"><span class="lbl">'+tx('note_opt')+'</span><input id="o-note" class="input" value="'+esc(s.note)+'" placeholder="'+tx('note_ph')+'"></label>'+
+        (s.id?'<button class="btn btn-danger tap" data-act="del-order" data-confirm="'+tx('delete_order_confirm')+'">'+tx('delete_order')+'</button>':'');
+      foot='<div class="ofoot" id="ofoot">'+orderFootInner()+'</div>';
+    }
+  } else if(s.kind==='activity'){
+    const c=S.clients[s.clientId]; title=t('log_activity');
+    const today=todayISO();
+    const quick=[['no_followup',''],['tomorrow',addDays(today,1)],['in3',addDays(today,3)],['next_week',addDays(today,7)],['in2w',addDays(today,14)]];
+    body='<p style="margin:0 0 14px;font-weight:600">'+esc(c?c.name:'')+'</p>'+
+      '<div class="field"><span class="lbl">'+tx('what_happened')+'</span><div class="chips" data-group="type">'+ACTS.map(a=>'<button class="chip tap" data-act="chip" data-v="'+a+'" aria-pressed="'+(s.type===a)+'">'+tx('act_'+a)+'</button>').join('')+'</div></div>'+
+      '<label class="field"><span class="lbl">'+tx('date')+'</span><input id="a-date" class="input" type="date" value="'+esc(s.date)+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('notes')+'</span><textarea id="a-text" class="input" rows="3">'+esc(s.text)+'</textarea></label>'+
+      '<div class="field"><span class="lbl">'+tx('next_followup')+'</span><div class="chips" data-group="follow">'+quick.map(q=>'<button class="chip tap" data-act="chip" data-v="'+q[1]+'" aria-pressed="'+(s.follow===q[1])+'">'+tx(q[0])+'</button>').join('')+'</div></div>'+
+      '<label class="field"><span class="lbl">'+tx('pick_date')+'</span><input id="a-follow" class="input" type="date" value="'+esc(s.follow)+'"></label>';
+    foot='<button class="btn btn-ink tap" data-act="save-activity">'+tx('log_activity')+'</button>';
+  } else if(s.kind==='member'){
+    const f=s.f; title=t(s.id?'edit_member':'new_member');
+    const taken=Object.values(S.members).filter(m=>m.uid && m.id!==s.id).map(m=>m.uid);
+    body='<label class="field"><span class="lbl">'+tx('m_name')+'</span><input id="mf-name" class="input" value="'+esc(f.name)+'" placeholder="'+tx('m_name_ph')+'" autocomplete="off"></label>'+
+      '<label class="field"><span class="lbl">'+tx('email')+'</span><input id="mf-email" class="input" type="email" value="'+esc(f.email)+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('phone')+'</span><input id="mf-phone" class="input" type="tel" value="'+esc(f.phone)+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('position')+'</span><input id="mf-position" class="input" value="'+esc(f.position)+'" placeholder="'+tx('position_ph')+'"></label>'+
+      '<label class="field"><span class="lbl">'+tx('segment')+'</span><input id="mf-segment" class="input" list="seg-list" value="'+esc(f.segment)+'" placeholder="'+tx('segment_ph')+'"><datalist id="seg-list">'+TYPES.map(ty=>'<option value="'+tx('type_'+ty)+'"></option>').join('')+'</datalist></label>'+
+      '<label class="field"><span class="lbl">'+tx('m_account')+'</span><select id="mf-uid" class="sel"><option value="">'+tx('m_not_linked')+'</option>'+S.team.ids.filter(id=>taken.indexOf(id)<0).map(id=>'<option value="'+esc(id)+'"'+(f.uid===id?' selected':'')+'>'+esc(accountLabel(id))+(id===S.uid?' '+tx('you'):'')+'</option>').join('')+'</select><span class="note" style="display:block;margin:6px 2px 0">'+tx('m_account_hint')+'</span></label>'+
+      (s.id?'<button class="btn btn-danger tap" data-act="del-member" data-confirm="'+tx('delete_member_confirm')+'">'+tx('delete_member')+'</button>':'');
+    if(s.id && (f.phone||f.email)) body='<div class="contact-list" style="margin:0 0 16px">'+(f.phone?'<div class="cline"><span class="val num">'+esc(f.phone)+'</span><button class="mini tap" data-act="copy" data-text="'+esc(f.phone)+'">'+tx('copy')+'</button><a class="mini go tap" href="tel:'+esc(f.phone.replace(/[^\d+]/g,''))+'">'+tx('call')+'</a></div>':'')+(f.email?'<div class="cline"><span class="val">'+esc(f.email)+'</span><button class="mini tap" data-act="copy" data-text="'+esc(f.email)+'">'+tx('copy')+'</button><a class="mini tap" href="mailto:'+esc(f.email)+'">'+tx('email')+'</a></div>':'')+'</div>'+body;
+    foot='<button class="btn btn-ink tap" data-act="save-member">'+tx(s.id?'save_member':'add_member')+'</button>';
+  }
+  host.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(title)+'" tabindex="-1"><div class="sh-h"><h2>'+esc(title)+'</h2><button class="sh-x tap" data-act="close-sheet" aria-label="'+tx('close')+'">'+ic('x')+'</button></div><div class="sh-b">'+body+'</div>'+(foot?'<div class="sh-f">'+foot+'</div>':'')+'</div></div>';
+  const dlg=host.querySelector('.sheet'); if(dlg) dlg.focus({preventScroll:true});
+}
+function orderProducts(){
+  const s=S.sheet; const list=S.catalog.products.filter(p=>p.active!==false).map(p=>{
+    const old=s.oldLines&&s.oldLines.find(l=>l.pizzaId===p.id);
+    return {id:p.id,name:p.name,price:old?old.price:num(p.price),commission:old?old.commission:num(p.commission)};
+  });
+  (s.oldLines||[]).forEach(l=>{ if(!list.some(p=>p.id===l.pizzaId)) list.push({id:l.pizzaId,name:productName(l),price:l.price,commission:l.commission}); });
+  return list;
+}
+function orderLines(){ const s=S.sheet; return orderProducts().map(p=>({pizzaId:p.id,name:p.name,qty:s.qty[p.id]||0,price:p.price,commission:p.commission})).filter(l=>l.qty>0); }
+function orderFootInner(){
+  const s=S.sheet; const tt=totalsOf({lines:orderLines()}); const vat=num(S.catalog.vat!=null?S.catalog.vat:27);
+  const ok=s.clientId && s.date && tt.qty>0;
+  return '<div class="sum"><b>+'+esc(money(tt.commission))+'</b><span>'+tx('foot_line',{n:nf(tt.qty),net:money(tt.net),gross:money(tt.net*(1+vat/100))})+'</span></div><button class="btn btn-ink tap" data-act="save-order"'+(ok?'':' disabled')+'>'+tx(s.id?'save_order':'log_order')+'</button>';
+}
+function refreshOrderFoot(){ const el=document.getElementById('ofoot'); if(el) el.innerHTML=orderFootInner(); }
+function closeSheet(){ S.sheet=null; renderSheet(); }
+
+/* ---------- actions ---------- */
+function blankClient(){ return {name:'',type:'Restaurant',contact:'',phone:'',email:'',address:'',city:'',stage:'lead',nextFollowUp:'',notes:''}; }
+function patchClient(id, patch){
+  const c=Object.assign(clone(S.clients[id]), patch); S.clients[id]=c; render(); putDoc(id, c);
+}
+function goTop(){ try{ window.scrollTo(0,0); }catch(e){} }
+
+const A = {
+  nav(el){ S.clientId=null; S.tab=el.dataset.tab; if(S.tab==='team') resolveNames(); render(); goTop(); },
+  'open-client'(el){ S.clientId=el.dataset.id; render(); goTop(); },
+  back(){ S.clientId=null; render(); goTop(); },
+  'add-client'(){ S.sheet={kind:'client',f:blankClient()}; renderSheet(); },
+  'edit-client'(){ const c=S.clients[S.clientId]; S.sheet={kind:'client',id:c.id,f:Object.assign(blankClient(),clone(c))}; renderSheet(); },
+  'log-order'(el){ S.sheet={kind:'order',clientId:el.dataset.client||'',date:todayISO(),note:'',qty:{}}; renderSheet(); },
+  'open-order'(el){ const o=S.orders[el.dataset.id]; if(!o) return; const q={}; (o.lines||[]).forEach(l=>{q[l.pizzaId]=l.qty;}); S.sheet={kind:'order',id:o.id,clientId:o.clientId,date:o.date,note:o.note||'',qty:q,oldLines:clone(o.lines||[]),paid:!!o.paid,createdAt:o.createdAt}; renderSheet(); },
+  'log-activity'(){ const c=S.clients[S.clientId]; const today=todayISO(); S.sheet={kind:'activity',clientId:c.id,type:'call',date:today,text:'',follow:(c.nextFollowUp&&c.nextFollowUp>today)?c.nextFollowUp:''}; renderSheet(); },
+  'close-sheet'(){ closeSheet(); },
+  overlay(el,e){ if(e.target===el) closeSheet(); },
+  chip(el){
+    const g=el.parentElement.dataset.group; const v=el.dataset.v; const s=S.sheet; if(!s) return;
+    if(s.kind==='client') s.f[g]=v; else if(s.kind==='activity'){ if(g==='type') s.type=v; else { s.follow=v; const inp=document.getElementById('a-follow'); if(inp) inp.value=v; } }
+    el.parentElement.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed', b===el?'true':'false'));
+  },
+  'save-client'(){
+    const s=S.sheet; const g=id=>document.getElementById(id).value.trim();
+    const name=g('cf-name'); if(!name){ toast(t('name_required')); document.getElementById('cf-name').focus(); return; }
+    const old=s.id?S.clients[s.id]:null;
+    const id=s.id||rid('c_');
+    const body={kind:'client',id:id,name:name,type:s.f.type,contact:g('cf-contact'),phone:g('cf-phone'),email:g('cf-email'),address:g('cf-address'),city:g('cf-city'),stage:s.f.stage,nextFollowUp:document.getElementById('cf-fu').value||'',notes:document.getElementById('cf-notes').value.trim(),activities:old?clone(old.activities||[]):[],createdAt:old?old.createdAt:Date.now()};
+    S.clients[id]=body; putDoc(id, body); closeSheet();
+    if(!s.id){ S.clientId=id; goTop(); }
+    render();
+  },
+  step(el){ const s=S.sheet; const p=el.dataset.p; s.qty[p]=Math.max(0,Math.min(99999,(s.qty[p]||0)+Number(el.dataset.d))); const inp=document.querySelector('[data-qty="'+CSS.escape(p)+'"]'); if(inp){ inp.value=s.qty[p]||''; inp.classList.toggle('on',!!s.qty[p]); } refreshOrderFoot(); },
+  'save-order'(){
+    const s=S.sheet; const lines=orderLines(); if(!s.clientId||!s.date||!lines.length) return;
+    const id=s.id||rid('o_');
+    const body={kind:'order',id:id,clientId:s.clientId,date:s.date,note:(s.note||'').trim(),paid:!!s.paid,createdAt:s.createdAt||Date.now(),lines:lines};
+    S.orders[id]=body; putDoc(id, body);
+    const c=S.clients[s.clientId]; if(c && c.stage!=='customer'){ const nc=Object.assign(clone(c),{stage:'customer'}); S.clients[c.id]=nc; putDoc(c.id, nc); }
+    closeSheet(); render();
+  },
+  'del-order'(){ const id=S.sheet.id; delete S.orders[id]; delDoc(id); closeSheet(); render(); },
+  'save-activity'(){
+    const s=S.sheet; const c=S.clients[s.clientId]; if(!c) return closeSheet();
+    const act={id:rid('a_'),type:s.type,date:document.getElementById('a-date').value||todayISO(),text:document.getElementById('a-text').value.trim()};
+    let stage=c.stage;
+    if(s.type==='tasting'&&(stage==='lead'||stage==='contacted')) stage='tasting';
+    else if(s.type!=='note'&&stage==='lead') stage='contacted';
+    const follow=document.getElementById('a-follow').value||'';
+    closeSheet();
+    patchClient(c.id,{stage:stage,nextFollowUp:follow,activities:[act].concat(c.activities||[])});
+  },
+  'del-activity'(el){ const c=S.clients[S.clientId]; patchClient(c.id,{activities:(c.activities||[]).filter(a=>a.id!==el.dataset.id)}); },
+  'set-stage'(el){ patchClient(S.clientId,{stage:el.dataset.v}); },
+  'fu-quick'(el){ patchClient(S.clientId,{nextFollowUp:addDays(todayISO(),Number(el.dataset.d))}); },
+  'fu-clear'(){ patchClient(S.clientId,{nextFollowUp:''}); },
+  async 'del-client'(){
+    const id=S.clientId; const ods=ordersArr().filter(o=>o.clientId===id).map(o=>o.id);
+    delete S.clients[id]; ods.forEach(o=>delete S.orders[o]); S.clientId=null; render(); goTop();
+    delDoc(id); ods.forEach(o=>delDoc(o));
+  },
+  'toggle-paid'(el){ const o=S.orders[el.dataset.id]; if(!o) return; const n=Object.assign(clone(o),{paid:!o.paid}); S.orders[o.id]=n; render(); putDoc(o.id,n); },
+  'mark-all-paid'(){ ordersArr().filter(o=>monthKey(o.date)===S.om&&!o.paid).forEach(o=>{ const n=Object.assign(clone(o),{paid:true}); S.orders[o.id]=n; putDoc(o.id,n); }); render(); },
+  'f-type'(el){ S.cf.type=el.dataset.v; render(); },
+  'f-stage'(el){ S.cf.stage=el.dataset.v; render(); },
+  'go-stage'(el){ S.cf={q:'',type:'All',stage:el.dataset.stage}; S.tab='clients'; render(); goTop(); },
+  om(el){ S.om=shiftMonth(S.om,Number(el.dataset.d)); render(); },
+  of(el){ S.of=el.dataset.v; render(); },
+  tm(el){ S.tm=shiftMonth(S.tm,Number(el.dataset.d)); render(); },
+  lang(el){ lang=el.dataset.v; try{ localStorage.setItem('fz-lang',lang); }catch(e){} render(); renderSheet(); },
+  'prod-add'(){ S.draft.products.push({id:rid('p_'),name:'',price:'',commission:'',active:true}); S.touched=true; render(); const i=S.draft.products.length-1; const el=document.getElementById('p-name-'+i); if(el) el.focus(); },
+  'prod-toggle'(el){ const p=S.draft.products[Number(el.dataset.i)]; p.active=!p.active; S.touched=true; render(); },
+  'save-settings'(){
+    const d=S.draft;
+    const ns={kind:'settings',target:Math.max(0,num(d.target)),reorderDays:Math.max(1,Math.round(num(d.reorderDays))||21)};
+    if(ns.target!==S.settings.target||ns.reorderDays!==S.settings.reorderDays){ S.settings=Object.assign({},S.settings,ns); putDoc('settings',ns); }
+    if(S.isAdmin){
+      const cat={currency:cur(),vat:Math.max(0,num(d.vat)),products:d.products.map(p=>({id:p.id,name:p.name.trim()||t('new_product'),price:Math.max(0,num(p.price)),commission:Math.max(0,num(p.commission)),active:!!p.active}))};
+      if(JSON.stringify(cat)!==JSON.stringify({currency:cur(),vat:S.catalog.vat,products:S.catalog.products.map(p=>({id:p.id,name:p.name,price:p.price,commission:p.commission,active:p.active!==false}))})){
+        S.catalog=cat; persist(()=>S.db.doc('catalog/products').set(cat), false);
+      }
+    }
+    S.touched=false; toast(t('changes_saved')); render();
+  },
+  copy(el){
+    const text=el.dataset.text;
+    const done=()=>{ el.textContent=t('copied'); setTimeout(()=>{ el.textContent=t('copy'); },1500); };
+    try{ navigator.clipboard.writeText(text).then(done,()=>selectSibling(el)); }catch(e){ selectSibling(el); }
+  },
+  export(el){ exportCSV(el.dataset.kind); },
+  'add-member'(){ S.sheet={kind:'member',f:{name:'',email:'',phone:'',position:'',segment:'',uid:''}}; renderSheet(); },
+  'open-member'(el){ const m=S.members[el.dataset.id]; if(!m) return; S.sheet={kind:'member',id:m.id,f:Object.assign({name:'',email:'',phone:'',position:'',segment:'',uid:''},clone(m))}; renderSheet(); },
+  'save-member'(){
+    const s=S.sheet; const g=id=>document.getElementById(id).value.trim();
+    const name=g('mf-name'); if(!name){ toast(t('m_name_required')); document.getElementById('mf-name').focus(); return; }
+    const id=s.id||rid('m_');
+    const old=s.id?S.members[s.id]:null;
+    const body={id:id,name:name,email:g('mf-email'),phone:g('mf-phone'),position:g('mf-position'),segment:g('mf-segment'),uid:document.getElementById('mf-uid').value||'',createdAt:old?old.createdAt:Date.now()};
+    S.members[id]=body; persist(()=>S.db.collection('members').doc(id).set(body), false);
+    closeSheet(); render();
+  },
+  'del-member'(){ const id=S.sheet.id; delete S.members[id]; persist(()=>S.db.collection('members').doc(id).delete(), false); closeSheet(); render(); }
+};
+function selectSibling(el){ const v=el.parentElement.querySelector('.val'); if(!v) return; const r=document.createRange(); r.selectNodeContents(v); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+document.addEventListener('click', e=>{
+  const el=e.target.closest('[data-act]'); if(!el) return;
+  const a=el.dataset.act;
+  if(a==='overlay'){ A.overlay(el,e); return; }
+  if(el.dataset.confirm && !el.classList.contains('armed')){
+    const orig=el.textContent; el.classList.add('armed'); el.textContent=el.dataset.confirm;
+    setTimeout(()=>{ if(el.isConnected){ el.classList.remove('armed'); el.textContent=orig; } },4000);
+    return;
+  }
+  if(A[a]) A[a](el,e);
+});
+document.addEventListener('input', e=>{
+  const el=e.target;
+  if(el.id==='q'){ S.cf.q=el.value; const l=document.getElementById('clist'); if(l) l.innerHTML=clientListHTML(); return; }
+  if(el.dataset.qty!=null && S.sheet){ const v=parseInt(el.value.replace(/\D/g,''),10)||0; S.sheet.qty[el.dataset.qty]=Math.min(99999,v); el.classList.toggle('on',v>0); refreshOrderFoot(); return; }
+  if(el.id==='o-date' && S.sheet){ S.sheet.date=el.value; refreshOrderFoot(); return; }
+  if(el.id==='o-note' && S.sheet){ S.sheet.note=el.value; return; }
+  if(el.dataset.draft && S.draft){ S.draft[el.dataset.draft]=el.value; markTouched(); return; }
+  if(el.dataset.prod!=null && S.draft){ S.draft.products[Number(el.dataset.prod)][el.dataset.field]=el.value; markTouched(); return; }
+});
+function markTouched(){ if(!S.touched){ S.touched=true; renderSavebar(); } }
+document.addEventListener('change', e=>{
+  const el=e.target;
+  if(el.id==='o-client' && S.sheet){ S.sheet.clientId=el.value; refreshOrderFoot(); return; }
+  if(el.id==='o-date' && S.sheet){ S.sheet.date=el.value; refreshOrderFoot(); return; }
+  if(el.id==='a-follow' && S.sheet){ S.sheet.follow=el.value; const g=document.querySelector('[data-group="follow"]'); if(g) g.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===el.value?'true':'false')); return; }
+  if(el.id==='fu-date' && S.clientId){ el.blur(); patchClient(S.clientId,{nextFollowUp:el.value||''}); return; }
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && S.sheet) closeSheet(); });
+
+/* ---------- export ---------- */
+function csvCell(v){ const s=String(v==null?'':v); return /[;"\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+async function exportCSV(kind){
+  let dl=null; try{ dl=await window.claude.use('downloads'); }catch(e){}
+  if(!dl){ toast(t('export_failed')); return; }
+  const rows=[];
+  if(kind==='orders'){
+    rows.push(t('csv_orders'));
+    ordersArr().sort((a,b)=>a.date.localeCompare(b.date)).forEach(o=>{ const c=S.clients[o.clientId]||{};
+      (o.lines||[]).forEach(l=>rows.push([o.date,c.name||'',c.type?t('type_'+c.type):'',c.city||'',productName(l),l.qty,l.price,l.qty*l.price,l.commission,l.qty*l.commission,o.paid?t('yes'):t('no'),o.note||''].map(csvCell).join(';')));
+    });
+  } else {
+    rows.push(t('csv_clients'));
+    clientsArr().sort(byName).forEach(c=>{ const os=ordersArr().filter(o=>o.clientId===c.id); const tt=sumTotals(os);
+      rows.push([c.name,t('type_'+c.type),t('st_'+c.stage),c.contact,c.phone,c.email,c.address,c.city,c.nextFollowUp,os.length,tt.qty,tt.net,tt.commission,c.notes].map(csvCell).join(';'));
+    });
+  }
+  try{ await dl.save({filename:'freezbee-'+kind+'-'+todayISO()+'.csv',data:'﻿'+rows.join('\r\n')}); toast(t('exported')); }
+  catch(e){ toast(e&&e.code==='declined'?t('export_declined'):t('export_failed')); }
+}
+
+/* ---------- team ---------- */
+const teamSubs={};
+function startTeam(){
+  S.db.collection('team').onSnapshot(snap=>{
+    const ids=snap.docs.map(d=>d.id).slice(0,50);
+    ids.forEach(id=>{
+      if(teamSubs[id]) return;
+      teamSubs[id]=S.db.collection('data/users/'+id).onSnapshot(s=>{
+        const os=[]; let n=0;
+        s.docs.forEach(d=>{ const v=d.data(); if(!v) return; if(v.kind==='order') os.push(v); else if(v.kind==='client') n++; });
+        S.team.data[id]={clients:n,orders:os}; if(S.tab==='team') scheduleRender();
+      }, ()=>{});
+    });
+    Object.keys(teamSubs).forEach(id=>{ if(ids.indexOf(id)<0){ teamSubs[id](); delete teamSubs[id]; delete S.team.data[id]; } });
+    S.team.ids=ids; resolveNames();
+  }, ()=>{});
+  S.db.collection('members').onSnapshot(snap=>{
+    const m={}; snap.docs.forEach(d=>{ const v=d.data(); if(v) m[d.id]=Object.assign({},v,{id:d.id}); });
+    S.members=m; if(S.tab==='team') scheduleRender();
+  }, ()=>{});
+}
+async function resolveNames(){
+  if(!S.user || !S.team.ids.length) return;
+  try{ const ps=await S.user.profiles(S.team.ids); const m={}; S.team.ids.forEach(id=>{ m[id]={name:(ps[id]&&ps[id].name)||''}; }); S.team.names=m; }catch(e){}
+  if(S.tab==='team') scheduleRender();
+}
+
+/* ---------- boot ---------- */
+async function init(){
+  if(!window.claude || typeof window.claude.use!=='function'){ S.phase='signedout'; render(); return; }
+  let db=null, user=null;
+  try{ const r=await Promise.all([window.claude.use('db'), window.claude.use('user')]); db=r[0]; user=r[1]; }catch(e){}
+  S.db=db; S.user=user;
+  const id = user ? await user.id() : null;
+  if(!db || !id){ S.phase='signedout'; render(); return; }
+  S.uid=id; S.isAdmin = await user.canEdit(); S.phase='ready';
+  myCol().onSnapshot(snap=>{
+    const c={}, o={}; let st=null;
+    snap.docs.forEach(d=>{ const v=d.data(); if(!v) return; if(v.kind==='client') c[d.id]=Object.assign({},v,{id:d.id}); else if(v.kind==='order') o[d.id]=Object.assign({},v,{id:d.id}); else if(d.id==='settings') st=v; });
+    S.clients=c; S.orders=o; if(st) S.settings=Object.assign({},S.settings,{target:st.target,reorderDays:st.reorderDays});
+    S.loaded=true; scheduleRender();
+  }, e=>{ if(e && e.code==='revoked'){ S.phase='signedout'; render(); } });
+  S.db.doc('catalog/products').onSnapshot(s=>{
+    const v=s.exists?s.data():null;
+    if(v && Array.isArray(v.products) && v.products.length){ S.catalog={currency:v.currency||'Ft',vat:v.vat!=null?v.vat:27,products:v.products}; scheduleRender(); }
+  }, ()=>{});
+  S.db.doc('team/'+id).get().then(s=>{ if(!s.exists) return S.db.doc('team/'+id).set({joined:todayISO()}); }).catch(()=>{});
+  if(S.isAdmin) startTeam();
+  render();
+}
+render();
+init();
+})();
+</script>
