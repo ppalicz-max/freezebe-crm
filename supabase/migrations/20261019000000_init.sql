@@ -147,6 +147,7 @@ create table public.clients (
   unique (rep_id, place_id)                            -- a rep can't add the same business twice
 );
 create index clients_rep_idx on public.clients (rep_id, name);
+create index clients_place_idx on public.clients (place_id) where place_id is not null;
 create trigger clients_touch before update on public.clients
   for each row execute function public.touch_updated_at();
 
@@ -236,8 +237,10 @@ begin
 end $$;
 
 revoke execute on function public.hook_before_user_created(jsonb) from public;
+revoke execute on function public.hook_before_user_created(jsonb) from anon, authenticated;
 do $$ begin
   if exists (select 1 from pg_roles where rolname = 'supabase_auth_admin') then
+    grant usage on schema public to supabase_auth_admin;
     grant execute on function public.hook_before_user_created(jsonb) to supabase_auth_admin;
   end if;
 end $$;
@@ -246,6 +249,8 @@ end $$;
 -- Save an order and its lines in one transaction
 -------------------------------------------------------------------------------
 -- p_lines: [{"product_id": "<uuid>", "qty": 12}, ...]
+-- p_order_id: an existing order of yours to edit, or a new id chosen by the app
+-- (so it can show the order before the server answers), or null.
 -- New lines take the current catalog price/commission. When editing, products
 -- already on the order keep the price/commission they were saved with.
 -- Also moves the client to the "customer" stage, like the original app.
@@ -261,6 +266,8 @@ declare
   v_uid   uuid := auth.uid();
   v_id    uuid;
   v_lines jsonb;
+  v_owner uuid;
+  v_new   boolean;
 begin
   if v_uid is null or not public.is_member() then
     raise exception 'Not allowed' using errcode = '42501';
@@ -268,8 +275,9 @@ begin
   if not exists (select 1 from public.clients where id = p_client_id and rep_id = v_uid) then
     raise exception 'Client not found' using errcode = 'P0002';
   end if;
-  if p_order_id is not null
-     and not exists (select 1 from public.orders where id = p_order_id and rep_id = v_uid) then
+  select rep_id into v_owner from public.orders where id = p_order_id;
+  v_new := v_owner is null;
+  if not v_new and v_owner <> v_uid then
     raise exception 'Order not found' using errcode = 'P0002';
   end if;
   if jsonb_typeof(p_lines) is distinct from 'array' then
@@ -304,9 +312,9 @@ begin
     raise exception 'Unknown or hidden product' using errcode = '22023';
   end if;
 
-  if p_order_id is null then
-    insert into public.orders (rep_id, client_id, order_date, note)
-    values (v_uid, p_client_id, p_order_date, coalesce(trim(p_note), ''))
+  if v_new then
+    insert into public.orders (id, rep_id, client_id, order_date, note)
+    values (coalesce(p_order_id, gen_random_uuid()), v_uid, p_client_id, p_order_date, coalesce(trim(p_note), ''))
     returning id into v_id;
   else
     update public.orders
@@ -326,6 +334,20 @@ begin
 
   return v_id;
 end $$;
+
+-------------------------------------------------------------------------------
+-- "Find business" duplicate check: does the current user ('mine') or another rep
+-- ('other') already have a client with this Google place id? Never says who.
+-------------------------------------------------------------------------------
+create function public.place_taken(p_place_id text) returns text
+language sql stable security definer set search_path = '' as $$
+  select case
+    when not public.is_member() then null
+    when exists (select 1 from public.clients
+                 where place_id = p_place_id and rep_id = (select auth.uid())) then 'mine'
+    when exists (select 1 from public.clients where place_id = p_place_id) then 'other'
+  end;
+$$;
 
 -------------------------------------------------------------------------------
 -- Team view: one row per linked team member for a month.
@@ -431,9 +453,20 @@ create policy ol_select on public.order_lines for select to authenticated
 -------------------------------------------------------------------------------
 -- Grants (RLS does the row filtering; these narrow what each role can touch)
 -------------------------------------------------------------------------------
+-- Explicit grants, so the app also works on projects where new tables are not
+-- exposed to the Data API automatically. The revokes below then narrow them.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on
+  public.team_members, public.app_settings, public.products, public.user_settings,
+  public.clients, public.activities, public.orders, public.order_lines
+  to authenticated;
+grant execute on function public.is_member(), public.is_owner() to authenticated;
+
 revoke all on all tables in schema public from anon;
 revoke all on function public.save_order(uuid, date, jsonb, text, uuid) from public, anon;
 revoke all on function public.team_month_summary(date) from public, anon;
+revoke all on function public.place_taken(text) from public, anon;
+grant execute on function public.place_taken(text) to authenticated;
 grant execute on function public.save_order(uuid, date, jsonb, text, uuid) to authenticated;
 grant execute on function public.team_month_summary(date) to authenticated;
 
