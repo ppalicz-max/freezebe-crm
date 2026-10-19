@@ -1,7 +1,8 @@
 # Freezbee CRM: rebuild plan
 
-Status: **draft for approval**. No app code yet, only this plan and the database schema
-(`supabase/migrations/20261019000000_init.sql`, `supabase/seed.sql`).
+Status: **approved and built.** Answers to the questions in section 8: email code sign-in;
+reps mark their own commission as paid; no data import; warn about duplicates across reps
+(`place_taken()` in the schema). See the README for setup.
 
 ## 1. Goal
 
