@@ -18,8 +18,6 @@ export interface Client {
   address: string;
   city: string;
   website: string;
-  googleMapsUrl: string;
-  placeId: string | null;
   nextFollowUp: string; // ISO date or ''
   notes: string;
   createdAt: number;
@@ -95,22 +93,4 @@ export interface TeamRow {
   net: number;
   commission: number;
   unpaid: number;
-}
-
-/** What "Find business" fills in. */
-export interface PlaceDetails {
-  placeId: string;
-  name: string;
-  address: string;
-  city: string;
-  phone: string;
-  website: string;
-  googleMapsUrl: string;
-  suggestedType: ClientType | null;
-}
-
-export interface PlaceSuggestion {
-  placeId: string;
-  main: string;
-  secondary: string;
 }

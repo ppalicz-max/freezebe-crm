@@ -58,8 +58,7 @@ insert into public.products (id, name, net_price, commission, sort_order, active
 set local role authenticated;
 select tests.login('00000000-0000-0000-0000-00000000000a');
 
-insert into public.clients (id, name, type, place_id) values ('20000000-0000-0000-0000-00000000000a', 'Hotel Anna', 'Hotel', 'ChIJ_A');
-select tests.throws($$insert into public.clients (name, place_id) values ('Dup', 'ChIJ_A')$$, 'same place twice for one rep');
+insert into public.clients (id, name, type) values ('20000000-0000-0000-0000-00000000000a', 'Hotel Anna', 'Hotel');
 select tests.throws($$insert into public.clients (name, rep_id) values ('Spoof', '00000000-0000-0000-0000-00000000000b')$$, 'rep_id spoofing');
 
 -- New order with an id chosen by the app
@@ -87,8 +86,6 @@ do $$ begin
   assert (select count(*) from public.team_members) = 1, 'reps see only their own team row';
   assert (select role from public.team_members) = 'rep', 'reps cannot promote themselves';
   assert (select count(*) from public.team_month_summary('2026-10-01')) = 1, 'rep summary only has themselves';
-  assert public.place_taken('ChIJ_A') = 'mine', 'place_taken mine';
-  assert public.place_taken('ChIJ_none') is null, 'place_taken none';
 end $$;
 reset role;
 
@@ -99,9 +96,8 @@ do $$ begin
   assert (select count(*) from public.clients) = 0, 'B sees no A clients';
   assert (select count(*) from public.orders) = 0, 'B sees no A orders';
   assert (select count(*) from public.order_lines) = 0, 'B sees no A order lines';
-  assert public.place_taken('ChIJ_A') = 'other', 'place_taken says another rep has it, without who';
 end $$;
-insert into public.clients (name, place_id) values ('Bar Béla', 'ChIJ_A');  -- allowed: different rep
+insert into public.clients (name) values ('Bar Béla');
 select tests.throws($$select public.save_order('20000000-0000-0000-0000-00000000000a', '2026-10-05',
   '[{"product_id":"10000000-0000-0000-0000-000000000001","qty":1}]')$$, 'order on another rep''s client');
 select tests.throws($$select public.save_order((select id from public.clients limit 1), '2026-10-05',

@@ -9,7 +9,7 @@ import type {
 /* ---------- row types ---------- */
 interface ClientRow {
   id: string; rep_id: string; name: string; type: ClientType; stage: Stage; contact: string; phone: string; email: string;
-  address: string; city: string; website: string; google_maps_url: string; place_id: string | null;
+  address: string; city: string; website: string;
   next_follow_up: string | null; notes: string; created_at: string;
 }
 interface ActivityRow { id: string; client_id: string; type: ActivityType; happened_on: string; text: string; created_at: string }
@@ -25,13 +25,13 @@ const time = (s: string) => Date.parse(s) || 0;
 
 export const toClient = (r: ClientRow): Client => ({
   id: r.id, name: r.name, type: r.type, stage: r.stage, contact: r.contact, phone: r.phone, email: r.email,
-  address: r.address, city: r.city, website: r.website, googleMapsUrl: r.google_maps_url, placeId: r.place_id,
+  address: r.address, city: r.city, website: r.website,
   nextFollowUp: r.next_follow_up ?? '', notes: r.notes, createdAt: time(r.created_at),
 });
 
 const fromClient = (c: Client) => ({
   id: c.id, name: c.name.trim(), type: c.type, stage: c.stage, contact: c.contact, phone: c.phone, email: c.email,
-  address: c.address, city: c.city, website: c.website, google_maps_url: c.googleMapsUrl, place_id: c.placeId || null,
+  address: c.address, city: c.city, website: c.website,
   next_follow_up: c.nextFollowUp || null, notes: c.notes,
 });
 
@@ -142,9 +142,6 @@ export async function insertActivity(a: Activity) {
 }
 export async function deleteActivity(id: string) {
   check(await supabase.from('activities').delete().eq('id', id));
-}
-export async function placeTaken(placeId: string): Promise<'mine' | 'other' | null> {
-  return check(await supabase.rpc('place_taken', { p_place_id: placeId })) as 'mine' | 'other' | null;
 }
 
 /* ---------- orders ---------- */

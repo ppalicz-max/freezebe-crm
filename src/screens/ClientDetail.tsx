@@ -6,11 +6,7 @@ import { useCrm, useLists } from '../store';
 import { Icon, TypeIcon } from '../components/Icon';
 import { Chip, ConfirmButton, CopyButton, OrderRow, SaveStatus, Section, stageLabel, typeLabel } from '../components/ui';
 
-function mapsHref(c: Client, place: string) {
-  if (c.googleMapsUrl) return safeUrl(c.googleMapsUrl);
-  const q = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place);
-  return c.placeId ? q + '&query_place_id=' + encodeURIComponent(c.placeId) : q;
-}
+const mapsHref = (place: string) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place);
 
 export function ClientDetail({ c }: { c: Client }) {
   const { activities, setClientId, setSheet, patchClient, deleteActivity, deleteClient } = useCrm();
@@ -20,7 +16,6 @@ export function ClientDetail({ c }: { c: Client }) {
   const tt = sumTotals(orders);
   const place = [c.address, c.city].filter(Boolean).join(', ');
   const web = safeUrl(c.website);
-  const maps = place || c.googleMapsUrl ? mapsHref(c, place) : null;
   const back = () => { setClientId(null); window.scrollTo(0, 0); };
   const fu = c.nextFollowUp;
   const late = Boolean(fu && fu < today);
@@ -39,7 +34,7 @@ export function ClientDetail({ c }: { c: Client }) {
       <h1 className="cd-name">{c.name}</h1>
       {c.contact ? <div className="cd-contact">{c.contact}</div> : null}
 
-      {c.phone || c.email || place || web || maps ? (
+      {c.phone || c.email || place || web ? (
         <div className="contact-list">
           {c.phone ? (
             <div className="cline"><span className="val num">{c.phone}</span><CopyButton text={c.phone} /><a className="mini go tap" href={telHref(c.phone)}>{t('call')}</a></div>
@@ -47,10 +42,10 @@ export function ClientDetail({ c }: { c: Client }) {
           {c.email ? (
             <div className="cline"><span className="val">{c.email}</span><CopyButton text={c.email} /><a className="mini tap" href={'mailto:' + c.email}>{t('email')}</a></div>
           ) : null}
-          {maps ? (
+          {place ? (
             <div className="cline">
-              <span className="val">{place || t('maps_link')}</span>
-              <a className="mini tap" target="_blank" rel="noopener noreferrer" href={maps}>{t(place ? 'directions' : 'open')}</a>
+              <span className="val">{place}</span>
+              <a className="mini tap" target="_blank" rel="noopener noreferrer" href={mapsHref(place)}>{t('directions')}</a>
             </div>
           ) : null}
           {web ? (

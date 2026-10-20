@@ -1,5 +1,10 @@
 # Freezbee CRM: rebuild plan
 
+Update 2026-10-20: **Google Places ("Find business") was removed** to keep the app simple.
+Clients are typed in by hand as in the original; the `website` field stays. Migration
+`20261020000000_remove_google_places.sql` drops `place_id`, `google_maps_url` and `place_taken()`,
+so the cross-rep duplicate warning (question 4) is gone too. Sections 5 and 6 below describe the earlier version.
+
 Status: **approved and built.** Answers to the questions in section 8: email code sign-in;
 reps mark their own commission as paid; no data import; warn about duplicates across reps
 (`place_taken()` in the schema). See the README for setup.

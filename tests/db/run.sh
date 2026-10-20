@@ -12,6 +12,6 @@ trap '$RUN "$PG_BIN/pg_ctl -D $DIR/data -m fast stop >/dev/null"; rm -rf "$DIR"'
 P="psql -h $DIR -p $PORT -U postgres -v ON_ERROR_STOP=1 -q"
 $P -c "create database crm"
 $P -d crm -f tests/db/auth_stub.sql
-$P -d crm -f supabase/migrations/20261019000000_init.sql
+for f in supabase/migrations/*.sql; do $P -d crm -f "$f"; done
 $P -d crm -f supabase/seed.sql
 $P -d crm -f tests/db/rls_test.sql

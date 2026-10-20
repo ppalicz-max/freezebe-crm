@@ -46,7 +46,7 @@ test('someone not on the team list cannot sign up', async ({ browser }) => {
   await expect(page.getByRole('alert')).toHaveText('Ez az e-mail-cím nincs a Freezbee csapatlistán. Kérd meg a CRM tulajdonosát, hogy vegyen fel.');
 });
 
-test('a rep adds a client with Find business, logs an order and an activity', async ({ browser }) => {
+test('a rep adds a client, logs an order and an activity', async ({ browser }) => {
   const page = await newUser(browser);
   await signIn(page, 'anna@test.hu', { wrongCodeFirst: true });
   await expect(page.getByRole('heading', { name: 'Kezdd az első ügyféllel' })).toBeVisible();
@@ -55,23 +55,23 @@ test('a rep adds a client with Find business, logs an order and an activity', as
 
   await page.getByRole('button', { name: 'Új ügyfél' }).click();
   await expect(sheet(page).getByRole('heading', { name: 'Új ügyfél' })).toBeVisible();
-  await page.locator('#cf-find').fill('Aranyhíd');
-  await sheet(page).getByRole('option', { name: /Aranyhíd Szálloda/ }).click();
-  await expect(page.locator('#cf-name')).toHaveValue('Aranyhíd Szálloda');
-  await expect(page.locator('#cf-address')).toHaveValue('Andrássy út 12');
-  await expect(page.locator('#cf-city')).toHaveValue('Budapest');
-  await expect(page.locator('#cf-phone')).toHaveValue('+36 1 234 5678');
-  await expect(page.locator('#cf-website')).toHaveValue('https://aranyhid.example/');
-  await expect(page.locator('#cf-maps')).toHaveValue('https://maps.google.com/?cid=111');
-  await expect(sheet(page).getByRole('button', { name: 'Szálloda' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(sheet(page).getByText('Kitöltve a Google Térképről')).toBeVisible();
+  // name is required
+  await sheet(page).getByRole('button', { name: 'Új ügyfél' }).click();
+  await expect(page.locator('#toast')).toHaveText('Add meg a cégnevet');
+  await page.locator('#cf-name').fill('Aranyhíd Szálloda');
+  await sheet(page).getByRole('button', { name: 'Szálloda' }).click();
   await page.locator('#cf-contact').fill('Kata, recepció');
+  await page.locator('#cf-phone').fill('+36 1 234 5678');
+  await page.locator('#cf-address').fill('Andrássy út 12');
+  await page.locator('#cf-city').fill('Budapest');
+  await page.locator('#cf-website').fill('aranyhid.example');
   await shot(page, '03-new-client-filled');
   await sheet(page).getByRole('button', { name: 'Új ügyfél' }).click();
 
   // client detail
   await expect(page.getByRole('heading', { name: 'Aranyhíd Szálloda' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Útvonal' })).toHaveAttribute('href', 'https://maps.google.com/?cid=111');
+  await expect(page.getByRole('link', { name: 'Útvonal' })).toHaveAttribute('href',
+    'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Andrássy út 12, Budapest'));
   await expect(page.getByRole('link', { name: 'Weboldal' })).toHaveAttribute('href', 'https://aranyhid.example/');
   await expect(page.getByRole('link', { name: 'Hívás' })).toHaveAttribute('href', 'tel:+3612345678');
 
@@ -125,36 +125,22 @@ test('a rep adds a client with Find business, logs an order and an activity', as
   await shot(page, '09-home-dark');
 });
 
-test('another rep only sees their own clients and is warned about a business another rep has', async ({ browser }) => {
+test('another rep only sees their own clients', async ({ browser }) => {
   const page = await newUser(browser);
   await signIn(page, 'bela@test.hu');
   await nav(page, 'Ügyfelek').click();
   await expect(page.locator('#clist')).toHaveText('Vedd fel a szállodákat, bárokat és éttermeket, akiknek eladsz vagy eladnál.');
-  await page.getByRole('button', { name: 'Új ügyfél' }).click();
-  await page.locator('#cf-find').fill('Aranyhíd');
-  await sheet(page).getByRole('option', { name: /Aranyhíd Szálloda/ }).click();
-  await expect(sheet(page).getByText('Ezzel az üzlettel már egy másik értékesítő foglalkozik.')).toBeVisible();
-  await shot(page, '10-duplicate-warning');
-  // pick the other place instead: no warning, type comes from Google
-  await page.locator('#cf-find').fill('Aranyhíd');
-  await sheet(page).getByRole('option', { name: /Aranyhíd Bisztró/ }).click();
-  await expect(sheet(page).getByText('Ezzel az üzlettel már egy másik értékesítő foglalkozik.')).toHaveCount(0);
-  await expect(page.locator('#cf-city')).toHaveValue('Siófok');
-  await expect(sheet(page).getByRole('button', { name: 'Étterem' })).toHaveAttribute('aria-pressed', 'true');
-  await sheet(page).getByRole('button', { name: 'Új ügyfél' }).click();
-  await expect(page.getByRole('heading', { name: 'Aranyhíd Bisztró' })).toBeVisible();
-
-  // adding the same business again is blocked
-  await page.getByRole('button', { name: 'Vissza' }).click();
+  await nav(page, 'Rendelések').click();
+  await expect(page.locator('.tile b.acc')).toHaveText(ft('0 Ft'));
   await nav(page, 'Ügyfelek').click();
   await page.getByRole('button', { name: 'Új ügyfél' }).click();
-  await page.locator('#cf-find').fill('Aranyhíd');
-  await sheet(page).getByRole('option', { name: /Aranyhíd Bisztró/ }).click();
-  await expect(sheet(page).getByText('Ez az üzlet már szerepel az ügyfeleid között.')).toBeVisible();
+  await page.locator('#cf-name').fill('Aranyhíd Bisztró');
+  await sheet(page).getByRole('button', { name: 'Étterem' }).click();
+  await page.locator('#cf-city').fill('Siófok');
   await sheet(page).getByRole('button', { name: 'Új ügyfél' }).click();
-  await expect(page.locator('#toast')).toHaveText('Ez az üzlet már szerepel az ügyfeleid között.');
-  await sheet(page).getByRole('button', { name: 'Ügyfél megnyitása' }).click();
   await expect(page.getByRole('heading', { name: 'Aranyhíd Bisztró' })).toBeVisible();
+  await page.getByRole('button', { name: 'Vissza' }).click();
+  await expect(page.locator('#clist .row')).toHaveCount(1);
 });
 
 test('the owner sees the team, manages members and edits the catalog', async ({ browser }) => {

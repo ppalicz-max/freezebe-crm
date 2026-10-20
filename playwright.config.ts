@@ -28,8 +28,6 @@ export default defineConfig({
       env: {
         VITE_SUPABASE_URL: 'http://localhost:54321',
         VITE_SUPABASE_ANON_KEY: ANON_KEY,
-        GOOGLE_PLACES_API_KEY: 'test-key',
-        PLACES_API_BASE: 'http://127.0.0.1:54321/google/v1',
       },
     },
   ],

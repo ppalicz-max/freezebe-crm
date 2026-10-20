@@ -28,7 +28,7 @@ export function clientsCsv(clients: Client[], orders: Order[]): string {
     const os = orders.filter((o) => o.clientId === c.id);
     const tt = sumTotals(os);
     rows.push([c.name, t(('type_' + c.type) as 'type_Hotel'), t(('st_' + c.stage) as 'st_lead'), c.contact, c.phone, c.email, c.address, c.city,
-      c.website, c.googleMapsUrl, c.nextFollowUp, os.length, tt.qty, tt.net, tt.commission, c.notes].map(csvCell).join(';'));
+      c.website, c.nextFollowUp, os.length, tt.qty, tt.net, tt.commission, c.notes].map(csvCell).join(';'));
   });
   return rows.join('\r\n');
 }

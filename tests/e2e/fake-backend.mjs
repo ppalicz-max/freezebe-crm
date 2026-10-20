@@ -1,7 +1,6 @@
 // Test stand-in for the Supabase gateway, on one port like the real thing:
 //   /rest/v1/*   -> PostgREST (real database, real row-level security)
 //   /auth/v1/*   -> tiny fake of Supabase Auth: email code sign-in; the code is always 123456
-//   /google/v1/* -> fake Google Places API (New)
 import http from 'node:http';
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -86,49 +85,11 @@ async function auth(req, res, path, url) {
   return send(res, 404, { msg: 'not in fake auth: ' + path });
 }
 
-const PLACES = {
-  ChIJ_aranyhid: {
-    id: 'ChIJ_aranyhid', displayName: { text: 'Aranyhíd Szálloda' }, formattedAddress: 'Budapest, Andrássy út 12, 1061 Hungary',
-    addressComponents: [
-      { longText: '12', types: ['street_number'] }, { longText: 'Andrássy út', types: ['route'] },
-      { longText: 'Budapest', types: ['locality', 'political'] }, { longText: '1061', types: ['postal_code'] },
-      { longText: 'Hungary', shortText: 'HU', types: ['country'] },
-    ],
-    internationalPhoneNumber: '+36 1 234 5678', nationalPhoneNumber: '(06 1) 234 5678', websiteUri: 'https://aranyhid.example/',
-    googleMapsUri: 'https://maps.google.com/?cid=111', primaryType: 'hotel', types: ['hotel', 'lodging'],
-  },
-  ChIJ_bistro: {
-    id: 'ChIJ_bistro', displayName: { text: 'Aranyhíd Bisztró' }, formattedAddress: 'Siófok, Petőfi sétány 3, 8600 Hungary',
-    addressComponents: [
-      { longText: '3', types: ['street_number'] }, { longText: 'Petőfi sétány', types: ['route'] },
-      { longText: 'Siófok', types: ['locality'] },
-    ],
-    googleMapsUri: 'https://maps.google.com/?cid=222', primaryType: 'bistro', types: ['bistro', 'restaurant'],
-  },
-};
-
-async function google(req, res, path) {
-  if (req.headers['x-goog-api-key'] !== 'test-key') return send(res, 403, { error: { message: 'bad key' } });
-  if (path === '/places:autocomplete') {
-    const { input } = JSON.parse(await body(req));
-    const list = Object.values(PLACES).filter((p) => p.displayName.text.toLowerCase().includes(String(input).toLowerCase().slice(0, 4)));
-    return send(res, 200, {
-      suggestions: list.map((p) => ({
-        placePrediction: { placeId: p.id, text: { text: p.displayName.text }, structuredFormat: { mainText: { text: p.displayName.text }, secondaryText: { text: p.formattedAddress } } },
-      })),
-    });
-  }
-  const m = path.match(/^\/places\/([\w-]+)$/);
-  if (m && PLACES[m[1]]) return send(res, 200, PLACES[m[1]]);
-  return send(res, 404, { error: { message: 'not found' } });
-}
-
 http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://x');
     if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }
     if (url.pathname.startsWith('/auth/v1')) return await auth(req, res, url.pathname.slice(8), url);
-    if (url.pathname.startsWith('/google/v1')) return await google(req, res, url.pathname.slice(10));
     if (url.pathname.startsWith('/rest/v1')) {
       const target = PGRST + url.pathname.slice(8) + url.search;
       const headers = { ...req.headers };

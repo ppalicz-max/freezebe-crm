@@ -241,8 +241,6 @@ tr.tot td{font-weight:700;border-top:2px solid var(--line)}
 @media (prefers-reduced-motion: reduce){.sheet{animation:none}.tap,.bar>i{transition:none}}
 
 /* added for the web app */
-.find-list{margin-top:8px}
-.find-list .row-main{padding-top:10px;padding-bottom:10px}
 .login-err{color:var(--bad);font-weight:600;margin:14px 0 0}
 .gate form .field{margin-bottom:14px}
 .banner .mini-btn{display:inline-block}

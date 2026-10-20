@@ -21,7 +21,7 @@ trap cleanup EXIT INT TERM
 P="psql -h $DIR -p $PG_PORT -U postgres -v ON_ERROR_STOP=1 -q"
 $P -c "create database crm"
 $P -d crm -f tests/db/auth_stub.sql
-$P -d crm -f supabase/migrations/20261019000000_init.sql
+for f in supabase/migrations/*.sql; do $P -d crm -f "$f"; done
 $P -d crm -f supabase/seed.sql
 $P -d crm -f tests/e2e/fixtures.sql
 
